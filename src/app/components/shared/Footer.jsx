@@ -1,4 +1,6 @@
 "use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   Aperture,
@@ -16,6 +18,12 @@ import {
 } from "react-icons/fa6";
 
 const Footer = () => {
+  const [year, setYear] = useState("");
+
+  useEffect(() => {
+    setYear(new Date().getFullYear());
+  }, []);
+
   const quickLinks = [
     { name: "Home", href: "/" },
     { name: "Explore Studios", href: "/studios" },
@@ -198,7 +206,7 @@ const Footer = () => {
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-5 py-6 text-center sm:px-8 md:flex-row md:text-left">
 
           <p className="text-sm text-gray-500">
-            © {new Date().getFullYear()} StudioSpace. All rights reserved.
+           © {year} StudioSpace. All rights reserved.
           </p>
 
           <div className="flex gap-6 text-sm text-gray-500">
