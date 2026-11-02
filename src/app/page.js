@@ -3,6 +3,7 @@ import FeaturedStudios from "./components/home/FeaturedStudios";
 import HeroSlider from "./components/home/HeroSlider";
 import StudioCategories from "./components/home/StudioCategories";
 import HowItWorks from "./components/home/HowItWorks";
+import HostSupport from "./components/home/HostSupport";
 
 export default function Home() {
   return (
@@ -20,6 +21,7 @@ export default function Home() {
 
       <StudioCategories />
       <HowItWorks />
+      <HostSupport />
     </div>
   );
 }
