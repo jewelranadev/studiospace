@@ -1,0 +1,229 @@
+import { Suspense } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import {
+MapPin,
+Star,
+ArrowRight,
+SlidersHorizontal,
+} from "lucide-react";
+
+const categories = [
+"All Studios",
+"Photo Studios",
+"Sound Stages",
+"Podcast Rooms",
+"Music Suites",
+"Art Workshops",
+];
+
+// Fetch Studios
+const StudiosContent = async ({ searchParams }) => {
+const params = await searchParams;
+const selectedCategory = params?.category || "";
+
+let studios = [];
+
+try {
+const query = selectedCategory
+? `?category=${encodeURIComponent(selectedCategory)}`
+: "";
+
+
+// Debugging
+console.log("Selected Category:", selectedCategory);
+console.log(
+  "API URL:",
+  `${process.env.SERVER_API_URL}/api/studios${query}`
+);
+
+const res = await fetch(
+  `${process.env.SERVER_API_URL}/api/studios${query}`,
+  {
+    cache: "no-store",
+  }
+);
+
+if (!res.ok) {
+  throw new Error("Failed to fetch studios");
+}
+
+const result = await res.json();
+
+console.log("Fetched Studios:", result.data);
+
+studios = result.data || [];
+
+
+} catch (error) {
+console.error("Explore Studios Error:", error);
+}
+
+return (
+<>
+{/* Results Heading */} <div className="mb-6 flex items-center justify-between"> <h2 className="text-xl font-bold text-gray-900">
+{selectedCategory || "All Studios"} </h2>
+    <p className="text-sm text-gray-500">
+      {studios.length} Studios Found
+    </p>
+  </div>
+
+  {/* Studio Cards */}
+  {studios.length > 0 ? (
+    <div className="grid grid-cols-1 gap-7 sm:grid-cols-2 lg:grid-cols-3">
+      {studios.map((studio) => (
+        <div
+          key={studio._id}
+          className="group flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl"
+        >
+          <div className="relative h-60 overflow-hidden">
+            <Image
+              src={studio.image}
+              alt={studio.title}
+              fill
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              className="object-cover transition-transform duration-500 group-hover:scale-110"
+            />
+
+            <div className="absolute right-3 top-3 z-10 flex items-center gap-1 rounded-full bg-white px-3 py-1.5 text-sm font-semibold text-gray-900 shadow">
+              <Star
+                size={15}
+                className="fill-yellow-400 text-yellow-400"
+              />
+              {studio.rating}
+            </div>
+          </div>
+
+          <div className="flex flex-1 flex-col p-5">
+            <span className="mb-3 w-fit rounded-full bg-purple-100 px-3 py-1 text-sm font-medium text-purple-700">
+              {studio.category}
+            </span>
+
+            <h3 className="mb-2 text-xl font-bold text-gray-900 transition-colors group-hover:text-purple-700">
+              {studio.title}
+            </h3>
+
+            <p className="mb-5 flex items-center gap-2 text-sm text-gray-500">
+              <MapPin size={16} className="shrink-0" />
+              {studio.location}
+            </p>
+
+            <div className="mt-auto flex items-center justify-between border-t border-gray-200 pt-4">
+              <div>
+                <p className="text-lg font-bold text-purple-600">
+                  ${studio.hourlyRate}
+                </p>
+
+                <span className="text-sm text-gray-500">
+                  Per Hour
+                </span>
+              </div>
+
+              <Link
+                href={`/studios/${studio._id}`}
+                className="flex items-center gap-2 rounded-lg bg-gray-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-purple-700"
+              >
+                View Details
+                <ArrowRight size={16} />
+              </Link>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  ) : (
+    <div className="rounded-2xl border border-gray-200 bg-white py-20 text-center">
+      <h3 className="text-xl font-bold text-gray-800">
+        No Studios Found
+      </h3>
+
+      <p className="mt-2 text-gray-500">
+        No studios are available in this category right now.
+      </p>
+
+      <Link
+        href="/studios"
+        className="mt-5 inline-flex items-center gap-2 rounded-lg bg-purple-600 px-5 py-3 font-semibold text-white transition hover:bg-purple-700"
+      >
+        View All Studios
+        <ArrowRight size={17} />
+      </Link>
+    </div>
+  )}
+</>
+
+
+);
+};
+
+// Explore Studios Page
+const ExploreStudios = ({ searchParams }) => {
+const selectedCategory = searchParams?.category || "";
+
+return ( <main className="min-h-screen bg-gray-50 px-4 py-16 md:px-10 lg:px-20"> <div className="mx-auto max-w-7xl">
+{/* Page Heading */} <div className="mb-10"> <p className="mb-3 font-semibold tracking-widest text-purple-600">
+FIND YOUR CREATIVE SPACE </p>
+
+
+      <h1 className="text-3xl font-bold text-gray-900 md:text-4xl">
+        Explore Studios
+      </h1>
+
+      <p className="mt-3 text-gray-500">
+        Discover the perfect studio for your next creative project.
+      </p>
+    </div>
+
+    {/* Category Filter */}
+    <div className="mb-10">
+      <div className="mb-4 flex items-center gap-2 text-gray-700">
+        <SlidersHorizontal size={19} />
+        <h2 className="font-semibold">Filter by Category</h2>
+      </div>
+
+      <div className="flex flex-wrap gap-3">
+        {categories.map((category) => {
+          const isActive =
+            category === "All Studios"
+              ? !selectedCategory
+              : selectedCategory === category;
+
+          const href =
+            category === "All Studios"
+              ? "/studios"
+              : `/studios?category=${encodeURIComponent(category)}`;
+
+          return (
+            <Link
+              key={category}
+              href={href}
+              className={`rounded-full border px-5 py-2.5 text-sm font-medium transition ${
+                isActive
+                  ? "border-purple-600 bg-purple-600 text-white"
+                  : "border-gray-200 bg-white text-gray-600 hover:border-purple-400 hover:text-purple-600"
+              }`}
+            >
+              {category}
+            </Link>
+          );
+        })}
+      </div>
+    </div>
+
+    {/* Studios */}
+    <Suspense
+      fallback={
+        <div className="py-20 text-center text-gray-500">
+          Loading studios...
+        </div>
+      }
+    >
+      <StudiosContent searchParams={searchParams} />
+    </Suspense>
+  </div>
+</main>
+
+);
+};
+
+export default ExploreStudios;
