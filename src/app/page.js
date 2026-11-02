@@ -1,6 +1,8 @@
 import { Suspense } from "react";
 import FeaturedStudios from "./components/home/FeaturedStudios";
 import HeroSlider from "./components/home/HeroSlider";
+import StudioCategories from "./components/home/StudioCategories";
+import HowItWorks from "./components/home/HowItWorks";
 
 export default function Home() {
   return (
@@ -15,6 +17,9 @@ export default function Home() {
       >
         <FeaturedStudios />
       </Suspense>
+
+      <StudioCategories />
+      <HowItWorks />
     </div>
   );
 }
