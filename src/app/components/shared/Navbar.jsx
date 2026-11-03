@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -13,20 +13,30 @@ import {
   Building2,
   CalendarDays,
   LogOut,
-  UserRound,
 } from "lucide-react";
+
+import { authClient } from "@/lib/auth-client";
 import Image from "next/image";
 
+
+
 const Navbar = () => {
+
+  const [isMounted, setIsMounted] = useState(false);
+
+useEffect(() => {
+  setIsMounted(true);
+}, []);
   const pathname = usePathname();
   const router = useRouter();
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-  // Temporary authentication state
-  // better-auth
-  const user = null;
+  // Get logged-in user session from Better Auth
+  const { data: session, isPending } = authClient.useSession();
+
+  const user = session?.user;
 
   const navLinks = [
     { name: "Home", href: "/" },
@@ -42,10 +52,19 @@ const Navbar = () => {
     return pathname === href || pathname.startsWith(`${href}/`);
   };
 
-  const handleLogout = () => {
-    setIsDropdownOpen(false);
-    // Better Auth signOut 
-    router.push("/");
+  // Logout with Better Auth
+  const handleLogout = async () => {
+    try {
+      await authClient.signOut();
+
+      setIsDropdownOpen(false);
+      setIsMenuOpen(false);
+
+      router.push("/");
+      router.refresh();
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
   };
 
   const closeMenu = () => {
@@ -70,6 +89,7 @@ const Navbar = () => {
             <h1 className="text-xl font-extrabold tracking-tight text-gray-900">
               Studio<span className="text-violet-600">Space</span>
             </h1>
+
             <p className="text-[10px] font-medium tracking-[2px] text-gray-500">
               CREATE WITHOUT LIMITS
             </p>
@@ -93,9 +113,12 @@ const Navbar = () => {
           ))}
         </div>
 
-        {/* Authentication */}
+        {/* Desktop Authentication */}
         <div className="hidden items-center gap-3 lg:flex">
-          {!user ? (
+
+          {!isMounted || isPending ? (
+            <div className="h-10 w-24 animate-pulse rounded-lg bg-gray-100" />
+          ) : !user ? (
             <>
               <Link
                 href="/login"
@@ -117,11 +140,17 @@ const Navbar = () => {
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                 className="flex items-center gap-2 rounded-xl border border-gray-200 p-2 transition hover:bg-gray-50"
               >
-                <Image
-                  src={user.image || "/profile.png"}
-                  alt="Profile"
-                  className="h-9 w-9 rounded-full object-cover"
-                />
+                {user.image ? (
+                  <Image
+                    src={user.image}
+                    alt="Profile"
+                    className="h-9 w-9 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-violet-100 font-bold text-violet-600">
+                    {user.name?.charAt(0)?.toUpperCase() || "U"}
+                  </div>
+                )}
 
                 <span className="text-sm font-semibold text-gray-800">
                   {user.name}
@@ -186,6 +215,7 @@ const Navbar = () => {
       {isMenuOpen && (
         <div className="border-t border-gray-100 bg-white px-5 py-5 shadow-lg lg:hidden">
           <div className="flex flex-col gap-4">
+
             {navLinks.map((link) => (
               <Link
                 key={link.name}
@@ -203,7 +233,9 @@ const Navbar = () => {
 
             <hr className="border-gray-100" />
 
-            {!user ? (
+            {!isMounted || isPending ? (
+              <div className="h-10 animate-pulse rounded-lg bg-gray-100" />
+            ) : !user ? (
               <div className="flex gap-3">
                 <Link
                   href="/login"
@@ -224,20 +256,46 @@ const Navbar = () => {
             ) : (
               <>
                 <div className="flex items-center gap-3">
-                  <Image
-                    src={user.image || "/profile.png"}
-                    alt="Profile"
-                    className="h-10 w-10 rounded-full object-cover"
-                  />
+                  {user.image ? (
+                    <Image
+                      src={user.image}
+                      alt="Profile"
+                      className="h-10 w-10 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-violet-100 font-bold text-violet-600">
+                      {user.name?.charAt(0)?.toUpperCase() || "U"}
+                    </div>
+                  )}
+
                   <span className="font-semibold text-gray-800">
                     {user.name}
                   </span>
                 </div>
 
-                <DropdownLink href="/dashboard" icon={<LayoutDashboard size={18} />} label="Dashboard" />
-                <DropdownLink href="/add-studio" icon={<PlusCircle size={18} />} label="Add New Studio" />
-                <DropdownLink href="/my-listings" icon={<Building2 size={18} />} label="My Studio Listings" />
-                <DropdownLink href="/my-bookings" icon={<CalendarDays size={18} />} label="My Bookings" />
+                <DropdownLink
+                  href="/dashboard"
+                  icon={<LayoutDashboard size={18} />}
+                  label="Dashboard"
+                />
+
+                <DropdownLink
+                  href="/add-studio"
+                  icon={<PlusCircle size={18} />}
+                  label="Add New Studio"
+                />
+
+                <DropdownLink
+                  href="/my-listings"
+                  icon={<Building2 size={18} />}
+                  label="My Studio Listings"
+                />
+
+                <DropdownLink
+                  href="/my-bookings"
+                  icon={<CalendarDays size={18} />}
+                  label="My Bookings"
+                />
 
                 <button
                   onClick={handleLogout}
@@ -255,6 +313,7 @@ const Navbar = () => {
   );
 };
 
+// Reusable Dropdown Link
 const DropdownLink = ({ href, icon, label }) => {
   return (
     <Link
