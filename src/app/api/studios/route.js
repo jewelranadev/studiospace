@@ -2,9 +2,9 @@ import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 
-// Get Single Studio
-export async function GET(request, { params }) {
+export async function POST(request) {
   try {
+    // Check user session
     const session = await auth.api.getSession({
       headers: await headers(),
     });
@@ -16,75 +16,58 @@ export async function GET(request, { params }) {
       );
     }
 
-    const { id } = await params;
-
-    const response = await fetch(
-      `${process.env.SERVER_API_URL}/api/studios/${id}`,
-      {
-        headers: {
-          "x-internal-api-key": process.env.INTERNAL_API_SECRET,
-          "x-user-email": session.user.email,
-        },
-        cache: "no-store",
-      }
-    );
-
-    const result = await response.json();
-
-    return NextResponse.json(result, {
-      status: response.status,
-    });
-  } catch (error) {
-    console.error("Get Studio API Error:", error);
-
-    return NextResponse.json(
-      { success: false, message: "Failed to fetch studio" },
-      { status: 500 }
-    );
-  }
-}
-
-// Update Studio
-export async function PUT(request, { params }) {
-  try {
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
-
-    if (!session?.user) {
-      return NextResponse.json(
-        { success: false, message: "Please login first" },
-        { status: 401 }
-      );
-    }
-
-    const { id } = await params;
+    // Get form data
     const body = await request.json();
 
+    // Send data to Express server
     const response = await fetch(
-      `${process.env.SERVER_API_URL}/api/studios/${id}`,
+      `${process.env.SERVER_API_URL}/api/studios`,
       {
-        method: "PUT",
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
           "x-internal-api-key": process.env.INTERNAL_API_SECRET,
           "x-user-email": session.user.email,
         },
-        body: JSON.stringify(body),
+        body: JSON.stringify({
+          ...body,
+          hostName: session.user.name,
+          hostEmail: session.user.email,
+        }),
         cache: "no-store",
       }
     );
 
-    const result = await response.json();
+    // Read server response
+    const text = await response.text();
+
+    let result;
+
+    try {
+      result = JSON.parse(text);
+    } catch {
+      console.error("Express returned invalid JSON:", text);
+
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Invalid response from server",
+        },
+        { status: 502 }
+      );
+    }
 
     return NextResponse.json(result, {
       status: response.status,
     });
   } catch (error) {
-    console.error("Update Studio API Error:", error);
+    console.error("Create Studio API Error:", error);
 
     return NextResponse.json(
-      { success: false, message: "Failed to update studio" },
+      {
+        success: false,
+        message: "Failed to create studio",
+      },
       { status: 500 }
     );
   }

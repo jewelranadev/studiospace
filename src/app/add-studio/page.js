@@ -67,72 +67,85 @@ export default function AddStudioPage() {
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+ const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    setMessage("");
-    setError("");
+  setMessage("");
+  setError("");
 
-    if (amenities.length === 0) {
-      setError("Please add at least one studio amenity.");
+  if (amenities.length === 0) {
+    setError("Please add at least one studio amenity.");
+    return;
+  }
+
+  setLoading(true);
+
+  try {
+    const response = await fetch("/api/studios", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        ...formData,
+        hourlyRate: Number(formData.hourlyRate),
+        securityDeposit: Number(formData.securityDeposit),
+        maxCapacity: Number(formData.maxCapacity),
+        amenities,
+      }),
+    });
+
+    const contentType = response.headers.get("content-type") || "";
+    const text = await response.text();
+
+    // Empty response check
+    if (!text.trim()) {
+      throw new Error(
+        `API returned an empty response. Status: ${response.status}`
+      );
+    }
+
+    // JSON response check
+    if (!contentType.includes("application/json")) {
+      console.error("Unexpected API response:", {
+        status: response.status,
+        contentType,
+        response: text,
+      });
+
+      throw new Error(
+        `API returned an invalid response. Status: ${response.status}`
+      );
+    }
+
+    const result = JSON.parse(text);
+
+    if (response.status === 401) {
+      router.push("/login");
       return;
     }
 
-    setLoading(true);
-
-    try {
-      const response = await fetch("/api/studios", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          ...formData,
-          hourlyRate: Number(formData.hourlyRate),
-          securityDeposit: Number(formData.securityDeposit),
-          maxCapacity: Number(formData.maxCapacity),
-          amenities,
-        }),
-      });
-
-      const text = await response.text();
-
-      let result;
-
-      try {
-        result = JSON.parse(text);
-      } catch {
-        console.error("Server returned HTML instead of JSON:", text);
-
-        throw new Error(
-          "API returned HTML instead of JSON. Check your API route.",
-        );
-      }
-
-      if (response.status === 401) {
-        router.push("/login");
-        return;
-      }
-
-      if (!response.ok || !result.success) {
-        throw new Error(result.message || "Failed to create studio.");
-      }
-
-      setMessage("Your studio has been created successfully!");
-
-      setFormData(initialForm);
-      setAmenities([]);
-
-      setTimeout(() => {
-        router.push("/dashboard");
-      }, 1500);
-    } catch (err) {
-      setError(err.message || "Something went wrong.");
-    } finally {
-      setLoading(false);
+    if (!response.ok || !result.success) {
+      throw new Error(result.message || "Failed to create studio.");
     }
-  };
 
+    setMessage("Your studio has been created successfully!");
+
+    setFormData(initialForm);
+    setAmenities([]);
+
+    setTimeout(() => {
+      router.push("/dashboard");
+    }, 1500);
+  } catch (err) {
+    console.error("Create Studio Error:", err);
+    setError(err.message || "Something went wrong.");
+  } finally {
+    setLoading(false);
+  }
+};
+
+  
   const inputClass =
     "w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-gray-900 outline-none transition focus:border-black focus:ring-2 focus:ring-black/10";
 
