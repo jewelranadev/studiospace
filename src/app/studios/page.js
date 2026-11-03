@@ -158,8 +158,6 @@ return (
 
 // Explore Studios Page
 const ExploreStudios = ({ searchParams }) => {
-const selectedCategory = searchParams?.category || "";
-
 return ( <main className="min-h-screen bg-gray-50 px-4 py-16 md:px-10 lg:px-20"> <div className="mx-auto max-w-7xl">
 {/* Page Heading */} <div className="mb-10"> <p className="mb-3 font-semibold tracking-widest text-purple-600">
 FIND YOUR CREATIVE SPACE </p>
@@ -174,6 +172,30 @@ FIND YOUR CREATIVE SPACE </p>
       </p>
     </div>
 
+    {/* searchParams-dependent UI is rendered by an async child inside
+        Suspense so the static shell can still be prerendered. */}
+    <Suspense
+      fallback={
+        <div className="py-20 text-center text-gray-500">
+          Loading studios...
+        </div>
+      }
+    >
+      <ExploreStudiosContent searchParams={searchParams} />
+    </Suspense>
+  </div>
+</main>
+
+);
+};
+
+// Filter + results (async child): awaits searchParams inside the
+// Suspense boundary above, keeping the URL read out of the page shell.
+const ExploreStudiosContent = async ({ searchParams }) => {
+const params = await searchParams;
+const selectedCategory = params?.category || "";
+
+return (<>
     {/* Category Filter */}
     <div className="mb-10">
       <div className="mb-4 flex items-center gap-2 text-gray-700">
@@ -220,8 +242,7 @@ FIND YOUR CREATIVE SPACE </p>
     >
       <StudiosContent searchParams={searchParams} />
     </Suspense>
-  </div>
-</main>
+</>
 
 );
 };
