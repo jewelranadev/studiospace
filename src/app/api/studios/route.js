@@ -2,85 +2,89 @@ import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 
-export async function POST(request) {
+// Get Single Studio
+export async function GET(request, { params }) {
   try {
-    // 1. Verify logged-in user
     const session = await auth.api.getSession({
       headers: await headers(),
     });
 
     if (!session?.user) {
       return NextResponse.json(
-        {
-          success: false,
-          message: "Please login first",
-        },
+        { success: false, message: "Please login first" },
         { status: 401 }
       );
     }
 
-    // 2. Get form data
-    const body = await request.json();
+    const { id } = await params;
 
-    // 3. Check environment variables
-    if (
-      !process.env.SERVER_API_URL ||
-      !process.env.INTERNAL_API_SECRET
-    ) {
-      throw new Error("Missing server environment variables");
-    }
-
-    // 4. Attach authenticated user information
-    const studioData = {
-      ...body,
-      hostName: session.user.name,
-      hostEmail: session.user.email,
-    };
-
-    // 5. Send request to Express backend
     const response = await fetch(
-      `${process.env.SERVER_API_URL}/api/studios`,
+      `${process.env.SERVER_API_URL}/api/studios/${id}`,
       {
-        method: "POST",
         headers: {
-          "Content-Type": "application/json",
           "x-internal-api-key": process.env.INTERNAL_API_SECRET,
+          "x-user-email": session.user.email,
         },
-        body: JSON.stringify(studioData),
         cache: "no-store",
       }
     );
 
-    // 6. Read backend response
-    const text = await response.text();
-
-    let result;
-
-    try {
-      result = JSON.parse(text);
-    } catch {
-      console.error("Express returned non-JSON response:", text);
-
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Backend returned an invalid response",
-        },
-        { status: 502 }
-      );
-    }
+    const result = await response.json();
 
     return NextResponse.json(result, {
       status: response.status,
     });
   } catch (error) {
-    console.error("Create Studio API Error:", error);
+    console.error("Get Studio API Error:", error);
 
     return NextResponse.json(
+      { success: false, message: "Failed to fetch studio" },
+      { status: 500 }
+    );
+  }
+}
+
+// Update Studio
+export async function PUT(request, { params }) {
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session?.user) {
+      return NextResponse.json(
+        { success: false, message: "Please login first" },
+        { status: 401 }
+      );
+    }
+
+    const { id } = await params;
+    const body = await request.json();
+
+    const response = await fetch(
+      `${process.env.SERVER_API_URL}/api/studios/${id}`,
       {
-        success: false,
-        message: error.message || "Failed to create studio",
-      },
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "x-internal-api-key": process.env.INTERNAL_API_SECRET,
+          "x-user-email": session.user.email,
+        },
+        body: JSON.stringify(body),
+        cache: "no-store",
+      }
+    );
+
+    const result = await response.json();
+
+    return NextResponse.json(result, {
+      status: response.status,
+    });
+  } catch (error) {
+    console.error("Update Studio API Error:", error);
+
+    return NextResponse.json(
+      { success: false, message: "Failed to update studio" },
       { status: 500 }
     );
   }
