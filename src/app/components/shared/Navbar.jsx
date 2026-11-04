@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
+
 import {
   Aperture,
   Menu,
@@ -13,27 +15,38 @@ import {
   Building2,
   CalendarDays,
   LogOut,
+  Sun,
+  Moon,
 } from "lucide-react";
 
 import { authClient } from "@/lib/auth-client";
-import Image from "next/image";
 
 const Navbar = () => {
+  const [theme, setTheme] = useState("light");
   const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
-  const pathname = usePathname();
-  const router = useRouter();
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-  // Get logged-in user session from Better Auth
-  const { data: session, isPending } = authClient.useSession();
+  const pathname = usePathname();
+  const router = useRouter();
 
+  const { data: session, isPending } = authClient.useSession();
   const user = session?.user;
+
+  useEffect(() => {
+    setIsMounted(true);
+
+    const savedTheme =
+      localStorage.getItem("studiospace-theme") || "light";
+
+    setTheme(savedTheme);
+
+    document.documentElement.classList.toggle(
+      "dark",
+      savedTheme === "dark"
+    );
+  }, []);
 
   const navLinks = [
     { name: "Home", href: "/" },
@@ -49,7 +62,21 @@ const Navbar = () => {
     return pathname === href || pathname.startsWith(`${href}/`);
   };
 
-  // Logout with Better Auth
+  // Theme Toggle
+  const toggleTheme = () => {
+    const newTheme = theme === "light" ? "dark" : "light";
+
+    setTheme(newTheme);
+
+    localStorage.setItem("studiospace-theme", newTheme);
+
+    document.documentElement.classList.toggle(
+      "dark",
+      newTheme === "dark"
+    );
+  };
+
+  // Logout
   const handleLogout = async () => {
     try {
       await authClient.signOut();
@@ -68,6 +95,7 @@ const Navbar = () => {
     setIsMenuOpen(false);
   };
 
+  // How It Works Navigation
   const handleHowItWorks = (e) => {
     e.preventDefault();
 
@@ -83,20 +111,25 @@ const Navbar = () => {
   };
 
   return (
-    <header className="sticky top-0 z-50 border-b border-gray-100 bg-white/95 shadow-sm backdrop-blur-md">
+    <header className="sticky top-0 z-50 border-b border-gray-100 bg-white/95 shadow-sm backdrop-blur-md dark:border-gray-700 dark:bg-gray-900/95">
       <nav className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+
         {/* Logo */}
-        <Link href="/" onClick={closeMenu} className="flex items-center gap-2">
+        <Link
+          href="/"
+          onClick={closeMenu}
+          className="flex items-center gap-2"
+        >
           <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-violet-600 text-white">
             <Aperture size={27} />
           </div>
 
           <div>
-            <h1 className="text-xl font-extrabold tracking-tight text-gray-900">
+            <h1 className="text-xl font-extrabold tracking-tight text-gray-900 dark:text-white">
               Studio<span className="text-violet-600">Space</span>
             </h1>
 
-            <p className="text-[10px] font-medium tracking-[2px] text-gray-500">
+            <p className="text-[10px] font-medium tracking-[2px] text-gray-500 dark:text-gray-400">
               CREATE WITHOUT LIMITS
             </p>
           </div>
@@ -109,12 +142,14 @@ const Navbar = () => {
               key={link.name}
               href={link.href}
               onClick={
-                link.name === "How It Works" ? handleHowItWorks : undefined
+                link.name === "How It Works"
+                  ? handleHowItWorks
+                  : undefined
               }
               className={`text-sm font-semibold transition ${
                 isActive(link.href)
                   ? "text-violet-600"
-                  : "text-gray-600 hover:text-violet-600"
+                  : "text-gray-600 hover:text-violet-600 dark:text-gray-300 dark:hover:text-violet-400"
               }`}
             >
               {link.name}
@@ -124,13 +159,27 @@ const Navbar = () => {
 
         {/* Desktop Authentication */}
         <div className="hidden items-center gap-3 lg:flex">
+
+          {/* Theme Toggle */}
+          <button
+            onClick={toggleTheme}
+            aria-label="Toggle theme"
+            className="rounded-lg border border-gray-200 p-2.5 text-gray-700 transition hover:bg-gray-100 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800"
+          >
+            {theme === "light" ? (
+              <Moon size={20} />
+            ) : (
+              <Sun size={20} />
+            )}
+          </button>
+
           {!isMounted || isPending ? (
-            <div className="h-10 w-24 animate-pulse rounded-lg bg-gray-100" />
+            <div className="h-10 w-24 animate-pulse rounded-lg bg-gray-100 dark:bg-gray-800" />
           ) : !user ? (
             <>
               <Link
                 href="/login"
-                className="rounded-lg px-4 py-2.5 text-sm font-semibold text-gray-700 transition hover:text-violet-600"
+                className="rounded-lg px-4 py-2.5 text-sm font-semibold text-gray-700 transition hover:text-violet-600 dark:text-gray-200 dark:hover:text-violet-400"
               >
                 Login
               </Link>
@@ -144,14 +193,18 @@ const Navbar = () => {
             </>
           ) : (
             <div className="relative">
+
+              {/* Profile Button */}
               <button
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="flex items-center gap-2 rounded-xl border border-gray-200 p-2 transition hover:bg-gray-50"
+                className="flex items-center gap-2 rounded-xl border border-gray-200 p-2 transition hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800"
               >
                 {user.image ? (
                   <Image
                     src={user.image}
                     alt="Profile"
+                    width={36}
+                    height={36}
                     className="h-9 w-9 rounded-full object-cover"
                   />
                 ) : (
@@ -160,15 +213,20 @@ const Navbar = () => {
                   </div>
                 )}
 
-                <span className="text-sm font-semibold text-gray-800">
+                <span className="text-sm font-semibold text-gray-800 dark:text-gray-100">
                   {user.name}
                 </span>
 
-                <ChevronDown size={17} />
+                <ChevronDown
+                  size={17}
+                  className="text-gray-600 dark:text-gray-300"
+                />
               </button>
 
+              {/* Profile Dropdown */}
               {isDropdownOpen && (
-                <div className="absolute right-0 top-14 w-60 rounded-xl border border-gray-100 bg-white p-2 shadow-xl">
+                <div className="absolute right-0 top-14 w-60 rounded-xl border border-gray-100 bg-white p-2 shadow-xl dark:border-gray-700 dark:bg-gray-800">
+
                   <DropdownLink
                     href="/dashboard"
                     icon={<LayoutDashboard size={18} />}
@@ -193,11 +251,17 @@ const Navbar = () => {
                     label="My Bookings"
                   />
 
-                  <hr className="my-2 border-gray-100" />
+                  <DropdownLink
+                    href="/host-bookings"
+                    icon={<CalendarDays size={18} />}
+                    label="Host Bookings"
+                  />
+
+                  <hr className="my-2 border-gray-100 dark:border-gray-700" />
 
                   <button
                     onClick={handleLogout}
-                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-red-500 transition hover:bg-red-50"
+                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-red-500 transition hover:bg-red-50 dark:hover:bg-red-950"
                   >
                     <LogOut size={18} />
                     Logout
@@ -211,7 +275,7 @@ const Navbar = () => {
         {/* Mobile Menu Button */}
         <button
           onClick={() => setIsMenuOpen(!isMenuOpen)}
-          className="rounded-lg p-2 text-gray-700 hover:bg-gray-100 lg:hidden"
+          className="rounded-lg p-2 text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800 lg:hidden"
           aria-label="Toggle navigation"
         >
           {isMenuOpen ? <X size={25} /> : <Menu size={25} />}
@@ -220,31 +284,59 @@ const Navbar = () => {
 
       {/* Mobile Navigation */}
       {isMenuOpen && (
-        <div className="border-t border-gray-100 bg-white px-5 py-5 shadow-lg lg:hidden">
+        <div className="border-t border-gray-100 bg-white px-5 py-5 shadow-lg dark:border-gray-700 dark:bg-gray-900 lg:hidden">
+
           <div className="flex flex-col gap-4">
+
+            {/* Mobile Links */}
             {navLinks.map((link) => (
               <Link
                 key={link.name}
                 href={link.href}
-                onClick={closeMenu}
+                onClick={
+                  link.name === "How It Works"
+                    ? handleHowItWorks
+                    : closeMenu
+                }
                 className={`font-semibold ${
-                  isActive(link.href) ? "text-violet-600" : "text-gray-700"
+                  isActive(link.href)
+                    ? "text-violet-600"
+                    : "text-gray-700 dark:text-gray-200"
                 }`}
               >
                 {link.name}
               </Link>
             ))}
 
-            <hr className="border-gray-100" />
+            <hr className="border-gray-100 dark:border-gray-700" />
+
+            {/* Mobile Theme Toggle */}
+            <button
+              onClick={toggleTheme}
+              className="flex items-center gap-3 font-semibold text-gray-700 dark:text-gray-200"
+            >
+              {theme === "light" ? (
+                <>
+                  <Moon size={20} />
+                  Dark Mode
+                </>
+              ) : (
+                <>
+                  <Sun size={20} />
+                  Light Mode
+                </>
+              )}
+            </button>
 
             {!isMounted || isPending ? (
-              <div className="h-10 animate-pulse rounded-lg bg-gray-100" />
+              <div className="h-10 animate-pulse rounded-lg bg-gray-100 dark:bg-gray-800" />
             ) : !user ? (
               <div className="flex gap-3">
+
                 <Link
                   href="/login"
                   onClick={closeMenu}
-                  className="flex-1 rounded-lg border border-violet-600 py-2.5 text-center font-semibold text-violet-600"
+                  className="flex-1 rounded-lg border border-violet-600 py-2.5 text-center font-semibold text-violet-600 dark:text-violet-400"
                 >
                   Login
                 </Link>
@@ -259,11 +351,15 @@ const Navbar = () => {
               </div>
             ) : (
               <>
+
+                {/* Mobile Profile */}
                 <div className="flex items-center gap-3">
                   {user.image ? (
                     <Image
                       src={user.image}
                       alt="Profile"
+                      width={40}
+                      height={40}
                       className="h-10 w-10 rounded-full object-cover"
                     />
                   ) : (
@@ -272,7 +368,7 @@ const Navbar = () => {
                     </div>
                   )}
 
-                  <span className="font-semibold text-gray-800">
+                  <span className="font-semibold text-gray-800 dark:text-gray-100">
                     {user.name}
                   </span>
                 </div>
@@ -281,24 +377,35 @@ const Navbar = () => {
                   href="/dashboard"
                   icon={<LayoutDashboard size={18} />}
                   label="Dashboard"
+                  onClick={closeMenu}
                 />
 
                 <DropdownLink
                   href="/add-studio"
                   icon={<PlusCircle size={18} />}
                   label="Add New Studio"
+                  onClick={closeMenu}
                 />
 
                 <DropdownLink
                   href="/my-listings"
                   icon={<Building2 size={18} />}
                   label="My Studio Listings"
+                  onClick={closeMenu}
                 />
 
                 <DropdownLink
                   href="/my-bookings"
                   icon={<CalendarDays size={18} />}
                   label="My Bookings"
+                  onClick={closeMenu}
+                />
+
+                <DropdownLink
+                  href="/host-bookings"
+                  icon={<CalendarDays size={18} />}
+                  label="Host Bookings"
+                  onClick={closeMenu}
                 />
 
                 <button
@@ -318,11 +425,12 @@ const Navbar = () => {
 };
 
 // Reusable Dropdown Link
-const DropdownLink = ({ href, icon, label }) => {
+const DropdownLink = ({ href, icon, label, onClick }) => {
   return (
     <Link
       href={href}
-      className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-violet-50 hover:text-violet-600"
+      onClick={onClick}
+      className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-violet-50 hover:text-violet-600 dark:text-gray-200 dark:hover:bg-gray-700 dark:hover:text-violet-400"
     >
       {icon}
       {label}
