@@ -16,13 +16,16 @@ baseURL: process.env.BETTER_AUTH_URL,
 
 secret: process.env.BETTER_AUTH_SECRET,
 
-trustedOrigins: ["http://localhost:3000"],
+trustedOrigins: [
+  "http://localhost:3000",
+  process.env.BETTER_AUTH_URL,
+].filter(Boolean),
 
 emailAndPassword: {
 enabled: true,
 minPasswordLength: 6,
 maxPasswordLength: 128,
-autoSignIn: false,
+autoSignIn: true,
 },
 
 session: {
