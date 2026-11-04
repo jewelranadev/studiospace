@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
+
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Navigation, Pagination } from "swiper/modules";
 
@@ -38,19 +39,20 @@ const slides = [
 ];
 
 const HeroSlider = () => {
- const [mounted, setMounted] = useState(false);
-  const [activeSlide, setActiveSlide] = useState(0);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
   if (!mounted) {
-    return <section className="min-h-[550px]" />;
+    return (
+      <section className="min-h-[550px] bg-gray-900 md:min-h-[650px]" />
+    );
   }
 
   return (
-    <section className="relative">
+    <section className="relative overflow-hidden bg-gray-950">
       <Swiper
         modules={[Autoplay, Navigation, Pagination]}
         slidesPerView={1}
@@ -58,6 +60,7 @@ const HeroSlider = () => {
         autoplay={{
           delay: 5000,
           disableOnInteraction: false,
+          pauseOnMouseEnter: true,
         }}
         navigation={{
           prevEl: ".hero-prev",
@@ -66,7 +69,6 @@ const HeroSlider = () => {
         pagination={{
           clickable: true,
         }}
-        onSlideChange={(swiper) => setActiveSlide(swiper.realIndex)}
         className="hero-swiper"
       >
         {slides.map((slide) => (
@@ -74,20 +76,23 @@ const HeroSlider = () => {
             <div
               className="relative flex min-h-[550px] items-center bg-cover bg-center px-6 py-20 md:min-h-[650px] md:px-16 lg:px-24"
               style={{
-                backgroundImage: `url(${slide.image})`,
+                backgroundImage: `url("${slide.image}")`,
               }}
             >
               {/* Dark Overlay */}
-              <div className="absolute inset-0 bg-black/65"></div>
+              <div className="absolute inset-0 bg-black/65" />
 
-              {/* Content */}
+              {/* Gradient Overlay */}
+              <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent" />
+
+              {/* Hero Content */}
               <div className="relative z-10 mx-auto w-full max-w-7xl">
                 <div className="max-w-3xl text-white">
-                  <span className="mb-5 inline-block rounded-full border border-white/30 bg-white/10 px-5 py-2 text-sm font-medium backdrop-blur-sm">
+                  <span className="mb-5 inline-flex items-center rounded-full border border-white/30 bg-white/10 px-5 py-2 text-sm font-medium text-white backdrop-blur-md">
                     Your Space, Your Creativity
                   </span>
 
-                  <h1 className="mb-6 text-4xl font-bold leading-tight md:text-5xl lg:text-7xl">
+                  <h1 className="mb-6 text-4xl leading-tight font-bold text-white sm:text-5xl md:text-6xl lg:text-7xl">
                     {slide.title}
                   </h1>
 
@@ -95,10 +100,11 @@ const HeroSlider = () => {
                     {slide.description}
                   </p>
 
+                  {/* CTA Buttons */}
                   <div className="flex flex-wrap gap-4">
                     <Link
                       href="/studios"
-                      className="flex items-center gap-2 rounded-lg bg-violet-600 px-6 py-3.5 font-semibold text-white transition hover:bg-violet-700"
+                      className="inline-flex items-center gap-2 rounded-lg bg-violet-600 px-6 py-3.5 font-semibold text-white transition duration-300 hover:bg-violet-700"
                     >
                       Explore Studios
                       <ArrowRight size={19} />
@@ -106,7 +112,7 @@ const HeroSlider = () => {
 
                     <Link
                       href="/studios"
-                      className="rounded-lg border border-white px-6 py-3.5 font-semibold text-white transition hover:bg-white hover:text-black"
+                      className="inline-flex items-center rounded-lg border border-white/80 bg-white/5 px-6 py-3.5 font-semibold text-white backdrop-blur-sm transition duration-300 hover:border-white hover:bg-white hover:text-gray-950"
                     >
                       Host Your Space
                     </Link>
@@ -118,22 +124,45 @@ const HeroSlider = () => {
         ))}
       </Swiper>
 
-      {/* Navigation Buttons */}
+      {/* Previous Button */}
       <button
         type="button"
-        className="hero-prev absolute left-4 top-1/2 z-20 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-md transition hover:bg-violet-600 md:left-8"
+        className="hero-prev absolute top-1/2 left-4 z-20 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/20 bg-black/30 text-white backdrop-blur-md transition duration-300 hover:border-violet-600 hover:bg-violet-600 md:left-8"
         aria-label="Previous slide"
       >
         <ChevronLeft size={24} />
       </button>
 
+      {/* Next Button */}
       <button
         type="button"
-        className="hero-next absolute right-4 top-1/2 z-20 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-md transition hover:bg-violet-600 md:right-8"
+        className="hero-next absolute top-1/2 right-4 z-20 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/20 bg-black/30 text-white backdrop-blur-md transition duration-300 hover:border-violet-600 hover:bg-violet-600 md:right-8"
         aria-label="Next slide"
       >
         <ChevronRight size={24} />
       </button>
+
+      {/* Pagination Styling */}
+      <style jsx global>{`
+        .hero-swiper .swiper-pagination {
+          bottom: 25px !important;
+        }
+
+        .hero-swiper .swiper-pagination-bullet {
+          width: 9px;
+          height: 9px;
+          background: #ffffff;
+          opacity: 0.5;
+          transition: all 0.3s ease;
+        }
+
+        .hero-swiper .swiper-pagination-bullet-active {
+          width: 28px;
+          border-radius: 10px;
+          background: #7c3aed;
+          opacity: 1;
+        }
+      `}</style>
     </section>
   );
 };
