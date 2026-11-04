@@ -61,9 +61,11 @@ console.error("Explore Studios Error:", error);
 
 return (
 <>
-{/* Results Heading */} <div className="mb-6 flex items-center justify-between"> <h2 className="text-xl font-bold text-gray-900">
+{/* Results Heading */} <div className="mb-6 flex items-center justify-between"> <h2 className="text-xl font-bold text-gray-900 dark:text-white">
 {selectedCategory || "All Studios"} </h2>
-    <p className="text-sm text-gray-500">
+
+
+    <p className="text-sm text-gray-500 dark:text-gray-400">
       {studios.length} Studios Found
     </p>
   </div>
@@ -74,7 +76,7 @@ return (
       {studios.map((studio) => (
         <div
           key={studio._id}
-          className="group flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl"
+          className="group flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl dark:border-gray-800 dark:bg-gray-900"
         >
           <div className="relative h-60 overflow-hidden">
             <Image
@@ -95,26 +97,26 @@ return (
           </div>
 
           <div className="flex flex-1 flex-col p-5">
-            <span className="mb-3 w-fit rounded-full bg-purple-100 px-3 py-1 text-sm font-medium text-purple-700">
+            <span className="mb-3 w-fit rounded-full bg-purple-100 px-3 py-1 text-sm font-medium text-purple-700 dark:bg-purple-900/40 dark:text-purple-300">
               {studio.category}
             </span>
 
-            <h3 className="mb-2 text-xl font-bold text-gray-900 transition-colors group-hover:text-purple-700">
+            <h3 className="mb-2 text-xl font-bold text-gray-900 transition-colors group-hover:text-purple-700 dark:text-white dark:group-hover:text-purple-400">
               {studio.title}
             </h3>
 
-            <p className="mb-5 flex items-center gap-2 text-sm text-gray-500">
+            <p className="mb-5 flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
               <MapPin size={16} className="shrink-0" />
               {studio.location}
             </p>
 
-            <div className="mt-auto flex items-center justify-between border-t border-gray-200 pt-4">
+            <div className="mt-auto flex items-center justify-between border-t border-gray-200 pt-4 dark:border-gray-700">
               <div>
-                <p className="text-lg font-bold text-purple-600">
+                <p className="text-lg font-bold text-purple-600 dark:text-purple-400">
                   ${studio.hourlyRate}
                 </p>
 
-                <span className="text-sm text-gray-500">
+                <span className="text-sm text-gray-500 dark:text-gray-400">
                   Per Hour
                 </span>
               </div>
@@ -132,12 +134,12 @@ return (
       ))}
     </div>
   ) : (
-    <div className="rounded-2xl border border-gray-200 bg-white py-20 text-center">
-      <h3 className="text-xl font-bold text-gray-800">
+    <div className="rounded-2xl border border-gray-200 bg-white py-20 text-center dark:border-gray-800 dark:bg-gray-900">
+      <h3 className="text-xl font-bold text-gray-800 dark:text-white">
         No Studios Found
       </h3>
 
-      <p className="mt-2 text-gray-500">
+      <p className="mt-2 text-gray-500 dark:text-gray-400">
         No studios are available in this category right now.
       </p>
 
@@ -152,31 +154,28 @@ return (
   )}
 </>
 
-
 );
 };
 
 // Explore Studios Page
 const ExploreStudios = ({ searchParams }) => {
-return ( <main className="min-h-screen bg-gray-50 px-4 py-16 md:px-10 lg:px-20"> <div className="mx-auto max-w-7xl">
-{/* Page Heading */} <div className="mb-10"> <p className="mb-3 font-semibold tracking-widest text-purple-600">
+return ( <main className="min-h-screen bg-gray-50 px-4 py-16 dark:bg-gray-950 md:px-10 lg:px-20"> <div className="mx-auto max-w-7xl">
+{/* Page Heading */} <div className="mb-10"> <p className="mb-3 font-semibold tracking-widest text-purple-600 dark:text-purple-400">
 FIND YOUR CREATIVE SPACE </p>
 
-
-      <h1 className="text-3xl font-bold text-gray-900 md:text-4xl">
+      <h1 className="text-3xl font-bold text-gray-900 dark:text-white md:text-4xl">
         Explore Studios
       </h1>
 
-      <p className="mt-3 text-gray-500">
+      <p className="mt-3 text-gray-500 dark:text-gray-400">
         Discover the perfect studio for your next creative project.
       </p>
     </div>
 
-    {/* searchParams-dependent UI is rendered by an async child inside
-        Suspense so the static shell can still be prerendered. */}
+    {/* SearchParams-dependent UI */}
     <Suspense
       fallback={
-        <div className="py-20 text-center text-gray-500">
+        <div className="py-20 text-center text-gray-500 dark:text-gray-400">
           Loading studios...
         </div>
       }
@@ -186,63 +185,61 @@ FIND YOUR CREATIVE SPACE </p>
   </div>
 </main>
 
+
 );
 };
 
-// Filter + results (async child): awaits searchParams inside the
-// Suspense boundary above, keeping the URL read out of the page shell.
+// Filter + Results
 const ExploreStudiosContent = async ({ searchParams }) => {
 const params = await searchParams;
 const selectedCategory = params?.category || "";
 
-return (<>
-    {/* Category Filter */}
-    <div className="mb-10">
-      <div className="mb-4 flex items-center gap-2 text-gray-700">
-        <SlidersHorizontal size={19} />
-        <h2 className="font-semibold">Filter by Category</h2>
-      </div>
+return (
+<>
+{/* Category Filter */} <div className="mb-10"> <div className="mb-4 flex items-center gap-2 text-gray-700 dark:text-gray-300"> <SlidersHorizontal size={19} /> <h2 className="font-semibold">Filter by Category</h2> </div>
 
-      <div className="flex flex-wrap gap-3">
-        {categories.map((category) => {
-          const isActive =
-            category === "All Studios"
-              ? !selectedCategory
-              : selectedCategory === category;
 
-          const href =
-            category === "All Studios"
-              ? "/studios"
-              : `/studios?category=${encodeURIComponent(category)}`;
+    <div className="flex flex-wrap gap-3">
+      {categories.map((category) => {
+        const isActive =
+          category === "All Studios"
+            ? !selectedCategory
+            : selectedCategory === category;
 
-          return (
-            <Link
-              key={category}
-              href={href}
-              className={`rounded-full border px-5 py-2.5 text-sm font-medium transition ${
-                isActive
-                  ? "border-purple-600 bg-purple-600 text-white"
-                  : "border-gray-200 bg-white text-gray-600 hover:border-purple-400 hover:text-purple-600"
-              }`}
-            >
-              {category}
-            </Link>
-          );
-        })}
-      </div>
+        const href =
+          category === "All Studios"
+            ? "/studios"
+            : `/studios?category=${encodeURIComponent(category)}`;
+
+        return (
+          <Link
+            key={category}
+            href={href}
+            className={`rounded-full border px-5 py-2.5 text-sm font-medium transition ${
+              isActive
+                ? "border-purple-600 bg-purple-600 text-white"
+                : "border-gray-200 bg-white text-gray-600 hover:border-purple-400 hover:text-purple-600 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:hover:border-purple-500 dark:hover:text-purple-400"
+            }`}
+          >
+            {category}
+          </Link>
+        );
+      })}
     </div>
+  </div>
 
-    {/* Studios */}
-    <Suspense
-      fallback={
-        <div className="py-20 text-center text-gray-500">
-          Loading studios...
-        </div>
-      }
-    >
-      <StudiosContent searchParams={searchParams} />
-    </Suspense>
+  {/* Studios */}
+  <Suspense
+    fallback={
+      <div className="py-20 text-center text-gray-500 dark:text-gray-400">
+        Loading studios...
+      </div>
+    }
+  >
+    <StudiosContent searchParams={searchParams} />
+  </Suspense>
 </>
+
 
 );
 };

@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
+import { toast } from "sonner";
 
 const initialForm = {
   title: "",
@@ -42,6 +43,7 @@ export default function EditStudioPage() {
 function EditStudioContent() {
   const router = useRouter();
   const { id } = useParams();
+
   const [formData, setFormData] = useState(initialForm);
   const [amenities, setAmenities] = useState([]);
   const [amenityInput, setAmenityInput] = useState("");
@@ -50,7 +52,6 @@ function EditStudioContent() {
   const [saving, setSaving] = useState(false);
 
   const [error, setError] = useState("");
-  const [message, setMessage] = useState("");
 
   // Get Existing Studio Data
   useEffect(() => {
@@ -63,6 +64,7 @@ function EditStudioContent() {
         const result = await response.json();
 
         if (response.status === 401) {
+          toast.error("Please login to continue.");
           router.push("/login");
           return;
         }
@@ -87,6 +89,7 @@ function EditStudioContent() {
         setAmenities(studio.amenities || []);
       } catch (err) {
         setError(err.message || "Something went wrong.");
+        toast.error(err.message || "Failed to load studio information.");
       } finally {
         setLoading(false);
       }
@@ -114,17 +117,21 @@ function EditStudioContent() {
     if (!value) return;
 
     if (amenities.some((item) => item.toLowerCase() === value.toLowerCase())) {
+      toast.error("This amenity has already been added.");
       setAmenityInput("");
       return;
     }
 
     setAmenities((prev) => [...prev, value]);
     setAmenityInput("");
+
+    toast.success("Amenity added successfully!");
   };
 
   // Remove Amenity
   const removeAmenity = (itemToRemove) => {
     setAmenities((prev) => prev.filter((item) => item !== itemToRemove));
+    toast.success("Amenity removed.");
   };
 
   // Enter Key
@@ -139,11 +146,8 @@ function EditStudioContent() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    setMessage("");
-    setError("");
-
     if (amenities.length === 0) {
-      setError("Please add at least one studio amenity.");
+      toast.error("Please add at least one studio amenity.");
       return;
     }
 
@@ -177,7 +181,9 @@ function EditStudioContent() {
       } catch {
         throw new Error("Server returned an invalid JSON response.");
       }
+
       if (response.status === 401) {
+        toast.error("Please login to continue.");
         router.push("/login");
         return;
       }
@@ -186,13 +192,13 @@ function EditStudioContent() {
         throw new Error(result.message || "Failed to update studio.");
       }
 
-      setMessage("Your studio has been updated successfully!");
+      toast.success("Your studio has been updated successfully!");
 
       setTimeout(() => {
         router.push("/my-listings");
       }, 1500);
     } catch (err) {
-      setError(err.message || "Something went wrong.");
+      toast.error(err.message || "Something went wrong.");
     } finally {
       setSaving(false);
     }
@@ -475,19 +481,6 @@ function EditStudioContent() {
               ))}
             </div>
           </section>
-
-          {/* Messages */}
-          {error && (
-            <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-              {error}
-            </div>
-          )}
-
-          {message && (
-            <div className="rounded-lg border border-green-200 bg-green-50 p-4 text-sm text-green-700">
-              {message}
-            </div>
-          )}
 
           {/* Submit */}
           <button

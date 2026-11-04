@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export default function DeleteStudioButton({ studioId }) {
   const [loading, setLoading] = useState(false);
@@ -27,10 +28,11 @@ export default function DeleteStudioButton({ studioId }) {
         throw new Error(result.message || "Failed to delete studio");
       }
 
-      alert("Studio deleted successfully!");
+      toast.success("Studio deleted successfully!");
+
       router.refresh();
     } catch (error) {
-      alert(error.message);
+      toast.error(error.message || "Something went wrong.");
     } finally {
       setLoading(false);
     }

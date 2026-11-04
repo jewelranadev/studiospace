@@ -41,19 +41,19 @@ const HowItWorks = () => {
   return (
     <section
       id="how-it-works"
-      className="scroll-mt-24 bg-gray-50 px-4 py-20 md:px-10 lg:px-20"
+      className="scroll-mt-24 bg-gray-50 px-4 py-20 transition-colors dark:bg-gray-950 md:px-10 lg:px-20"
     >
       <div className="mx-auto max-w-7xl">
         <div className="mb-16 text-center">
-          <p className="mb-3 font-semibold tracking-widest text-purple-600">
+          <p className="mb-3 font-semibold tracking-widest text-purple-600 dark:text-purple-400">
             SIMPLE BOOKING PROCESS
           </p>
 
-          <h2 className="text-3xl font-bold text-gray-900 md:text-4xl">
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-white md:text-4xl">
             How Booking Works
           </h2>
 
-          <p className="mx-auto mt-4 max-w-2xl text-gray-500">
+          <p className="mx-auto mt-4 max-w-2xl text-gray-500 dark:text-gray-400">
             Booking your perfect creative space is simple. Follow these four
             easy steps and start creating.
           </p>
@@ -65,28 +65,28 @@ const HowItWorks = () => {
 
             return (
               <div key={step.number} className="group relative">
-                <div className="h-full rounded-2xl border border-gray-200 bg-white p-7 transition-all duration-300 hover:-translate-y-2 hover:border-purple-200 hover:shadow-xl">
+                <div className="h-full rounded-2xl border border-gray-200 bg-white p-7 transition-all duration-300 hover:-translate-y-2 hover:border-purple-200 hover:shadow-xl dark:border-gray-800 dark:bg-gray-900 dark:hover:border-purple-500">
                   <div className="mb-6 flex items-center justify-between">
-                    <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-purple-100 text-purple-600 transition-all duration-300 group-hover:bg-purple-600 group-hover:text-white">
+                    <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-purple-100 text-purple-600 transition-all duration-300 group-hover:bg-purple-600 group-hover:text-white dark:bg-purple-500/20 dark:text-purple-400 dark:group-hover:bg-purple-600 dark:group-hover:text-white">
                       <Icon size={27} />
                     </div>
 
-                    <span className="text-4xl font-bold text-gray-100 transition-colors group-hover:text-purple-100">
+                    <span className="text-4xl font-bold text-gray-100 transition-colors group-hover:text-purple-100 dark:text-gray-700 dark:group-hover:text-purple-900">
                       {step.number}
                     </span>
                   </div>
 
-                  <h3 className="mb-3 text-xl font-bold text-gray-900">
+                  <h3 className="mb-3 text-xl font-bold text-gray-900 dark:text-white">
                     {step.title}
                   </h3>
 
-                  <p className="text-sm leading-7 text-gray-500">
+                  <p className="text-sm leading-7 text-gray-500 dark:text-gray-400">
                     {step.description}
                   </p>
                 </div>
 
                 {index !== steps.length - 1 && (
-                  <div className="absolute -right-6 top-1/2 z-10 hidden -translate-y-1/2 text-purple-400 lg:block">
+                  <div className="absolute top-1/2 -right-6 z-10 hidden -translate-y-1/2 text-purple-400 dark:text-purple-500 lg:block">
                     <ArrowRight size={24} />
                   </div>
                 )}

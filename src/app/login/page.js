@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
+import { toast } from "sonner";
 import {
   Mail,
   Lock,
@@ -24,14 +25,12 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
 
     if (params.get("registered") === "true") {
-      setSuccess("Registration successful! Please login.");
+      toast.success("Registration successful! Please login.");
     }
   }, []);
 
@@ -46,8 +45,6 @@ export default function LoginPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    setError("");
-    setSuccess("");
     setLoading(true);
 
     try {
@@ -58,15 +55,17 @@ export default function LoginPage() {
       });
 
       if (error) {
-        setError(error.message || "Invalid email or password.");
+        toast.error(error.message || "Invalid email or password.");
         return;
       }
+
+      toast.success("Login successful!");
 
       router.push("/");
       router.refresh();
     } catch (err) {
       console.error("Login Error:", err);
-      setError("Something went wrong. Please try again.");
+      toast.error("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -74,7 +73,6 @@ export default function LoginPage() {
 
   // Google Login
   const handleGoogleLogin = async () => {
-    setError("");
     setGoogleLoading(true);
 
     try {
@@ -84,12 +82,12 @@ export default function LoginPage() {
       });
 
       if (error) {
-        setError(error.message || "Google login failed.");
+        toast.error(error.message || "Google login failed.");
         setGoogleLoading(false);
       }
     } catch (err) {
       console.error("Google Login Error:", err);
-      setError("Unable to login with Google.");
+      toast.error("Unable to login with Google.");
       setGoogleLoading(false);
     }
   };
@@ -119,20 +117,6 @@ export default function LoginPage() {
             Login to continue your creative journey.
           </p>
         </div>
-
-        {/* Success Message */}
-        {success && (
-          <div className="mt-6 rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-700">
-            {success}
-          </div>
-        )}
-
-        {/* Error Message */}
-        {error && (
-          <div className="mt-6 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600">
-            {error}
-          </div>
-        )}
 
         {/* Login Form */}
         <form onSubmit={handleSubmit} className="mt-8 space-y-5">
@@ -245,3 +229,4 @@ export default function LoginPage() {
     </main>
   );
 }
+
