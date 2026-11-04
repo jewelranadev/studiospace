@@ -18,15 +18,12 @@ import {
 import { authClient } from "@/lib/auth-client";
 import Image from "next/image";
 
-
-
 const Navbar = () => {
-
   const [isMounted, setIsMounted] = useState(false);
 
-useEffect(() => {
-  setIsMounted(true);
-}, []);
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
   const pathname = usePathname();
   const router = useRouter();
 
@@ -71,16 +68,25 @@ useEffect(() => {
     setIsMenuOpen(false);
   };
 
+  const handleHowItWorks = (e) => {
+    e.preventDefault();
+
+    setIsMenuOpen(false);
+
+    if (pathname === "/") {
+      document.getElementById("how-it-works")?.scrollIntoView({
+        behavior: "smooth",
+      });
+    } else {
+      router.push("/#how-it-works");
+    }
+  };
+
   return (
     <header className="sticky top-0 z-50 border-b border-gray-100 bg-white/95 shadow-sm backdrop-blur-md">
       <nav className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-
         {/* Logo */}
-        <Link
-          href="/"
-          onClick={closeMenu}
-          className="flex items-center gap-2"
-        >
+        <Link href="/" onClick={closeMenu} className="flex items-center gap-2">
           <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-violet-600 text-white">
             <Aperture size={27} />
           </div>
@@ -102,6 +108,9 @@ useEffect(() => {
             <Link
               key={link.name}
               href={link.href}
+              onClick={
+                link.name === "How It Works" ? handleHowItWorks : undefined
+              }
               className={`text-sm font-semibold transition ${
                 isActive(link.href)
                   ? "text-violet-600"
@@ -115,7 +124,6 @@ useEffect(() => {
 
         {/* Desktop Authentication */}
         <div className="hidden items-center gap-3 lg:flex">
-
           {!isMounted || isPending ? (
             <div className="h-10 w-24 animate-pulse rounded-lg bg-gray-100" />
           ) : !user ? (
@@ -161,7 +169,6 @@ useEffect(() => {
 
               {isDropdownOpen && (
                 <div className="absolute right-0 top-14 w-60 rounded-xl border border-gray-100 bg-white p-2 shadow-xl">
-
                   <DropdownLink
                     href="/dashboard"
                     icon={<LayoutDashboard size={18} />}
@@ -215,16 +222,13 @@ useEffect(() => {
       {isMenuOpen && (
         <div className="border-t border-gray-100 bg-white px-5 py-5 shadow-lg lg:hidden">
           <div className="flex flex-col gap-4">
-
             {navLinks.map((link) => (
               <Link
                 key={link.name}
                 href={link.href}
                 onClick={closeMenu}
                 className={`font-semibold ${
-                  isActive(link.href)
-                    ? "text-violet-600"
-                    : "text-gray-700"
+                  isActive(link.href) ? "text-violet-600" : "text-gray-700"
                 }`}
               >
                 {link.name}
