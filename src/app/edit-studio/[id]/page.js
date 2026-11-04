@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 
@@ -24,9 +24,24 @@ const categories = [
 ];
 
 export default function EditStudioPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="flex min-h-screen items-center justify-center bg-gray-50">
+          <p className="text-lg font-medium text-gray-600">
+            Loading studio information...
+          </p>
+        </main>
+      }
+    >
+      <EditStudioContent />
+    </Suspense>
+  );
+}
+
+function EditStudioContent() {
   const router = useRouter();
   const { id } = useParams();
-
   const [formData, setFormData] = useState(initialForm);
   const [amenities, setAmenities] = useState([]);
   const [amenityInput, setAmenityInput] = useState("");
@@ -149,8 +164,19 @@ export default function EditStudioPage() {
         }),
       });
 
-      const result = await response.json();
+      const text = await response.text();
 
+      if (!text) {
+        throw new Error("Server returned an empty response.");
+      }
+
+      let result;
+
+      try {
+        result = JSON.parse(text);
+      } catch {
+        throw new Error("Server returned an invalid JSON response.");
+      }
       if (response.status === 401) {
         router.push("/login");
         return;

@@ -42,16 +42,13 @@ async function MyListingsContent() {
   let studios = [];
 
   try {
-    const res = await fetch(
-      `${process.env.SERVER_API_URL}/api/studios/mine`,
-      {
-        headers: {
-          "x-internal-api-key": process.env.INTERNAL_API_SECRET,
-          "x-user-email": session.user.email,
-        },
-        cache: "no-store",
-      }
-    );
+    const res = await fetch(`${process.env.SERVER_API_URL}/api/studios/mine`, {
+      headers: {
+        "x-internal-api-key": process.env.INTERNAL_API_SECRET,
+        "x-user-email": session.user.email,
+      },
+      cache: "no-store",
+    });
 
     const result = await res.json();
 
@@ -65,7 +62,6 @@ async function MyListingsContent() {
   return (
     <main className="min-h-screen bg-gray-50 px-4 py-12">
       <div className="mx-auto max-w-7xl">
-
         {/* Heading */}
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
           <div>
@@ -142,6 +138,13 @@ async function MyListingsContent() {
                     >
                       View Details
                     </Link>
+
+                    <Link
+                      href={`/edit-studio/${studio._id}`}
+                      className="text-sm font-semibold text-blue-600 hover:text-blue-700"
+                    >
+                      Edit
+                    </Link>
                     <DeleteStudioButton studioId={studio._id} />
                   </div>
                 </div>
@@ -150,10 +153,7 @@ async function MyListingsContent() {
           </div>
         ) : (
           <div className="mt-8 rounded-xl border border-dashed bg-white py-16 text-center">
-            <Building2
-              size={40}
-              className="mx-auto text-gray-400"
-            />
+            <Building2 size={40} className="mx-auto text-gray-400" />
 
             <h2 className="mt-4 text-xl font-bold text-gray-800">
               No Studios Found
@@ -172,7 +172,6 @@ async function MyListingsContent() {
             </Link>
           </div>
         )}
-
       </div>
     </main>
   );
