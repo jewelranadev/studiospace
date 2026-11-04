@@ -1,12 +1,14 @@
 import Image from "next/image";
 import Link from "next/link";
 import { MapPin, Star, ArrowRight } from "lucide-react";
+import { connection } from "next/server";
 
 const FeaturedStudios = async () => {
   let studios = [];
 
   // Fetch Featured Studios from Backend API
   try {
+    await connection();
     const res = await fetch(
       `${process.env.SERVER_API_URL}/api/studios/featured`,
       {
