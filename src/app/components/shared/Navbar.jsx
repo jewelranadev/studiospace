@@ -37,15 +37,11 @@ const Navbar = () => {
   useEffect(() => {
     setIsMounted(true);
 
-    const savedTheme =
-      localStorage.getItem("studiospace-theme") || "light";
+    const savedTheme = localStorage.getItem("studiospace-theme") || "light";
 
     setTheme(savedTheme);
 
-    document.documentElement.classList.toggle(
-      "dark",
-      savedTheme === "dark"
-    );
+    document.documentElement.classList.toggle("dark", savedTheme === "dark");
   }, []);
 
   const navLinks = [
@@ -70,10 +66,7 @@ const Navbar = () => {
 
     localStorage.setItem("studiospace-theme", newTheme);
 
-    document.documentElement.classList.toggle(
-      "dark",
-      newTheme === "dark"
-    );
+    document.documentElement.classList.toggle("dark", newTheme === "dark");
   };
 
   // Logout
@@ -113,13 +106,8 @@ const Navbar = () => {
   return (
     <header className="sticky top-0 z-50 border-b border-gray-100 bg-white/95 shadow-sm backdrop-blur-md dark:border-gray-700 dark:bg-gray-900/95">
       <nav className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-
         {/* Logo */}
-        <Link
-          href="/"
-          onClick={closeMenu}
-          className="flex items-center gap-2"
-        >
+        <Link href="/" onClick={closeMenu} className="flex items-center gap-2">
           <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-violet-600 text-white">
             <Aperture size={27} />
           </div>
@@ -142,9 +130,7 @@ const Navbar = () => {
               key={link.name}
               href={link.href}
               onClick={
-                link.name === "How It Works"
-                  ? handleHowItWorks
-                  : undefined
+                link.name === "How It Works" ? handleHowItWorks : undefined
               }
               className={`text-sm font-semibold transition ${
                 isActive(link.href)
@@ -159,18 +145,13 @@ const Navbar = () => {
 
         {/* Desktop Authentication */}
         <div className="hidden items-center gap-3 lg:flex">
-
           {/* Theme Toggle */}
           <button
             onClick={toggleTheme}
             aria-label="Toggle theme"
             className="rounded-lg border border-gray-200 p-2.5 text-gray-700 transition hover:bg-gray-100 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800"
           >
-            {theme === "light" ? (
-              <Moon size={20} />
-            ) : (
-              <Sun size={20} />
-            )}
+            {theme === "light" ? <Moon size={20} /> : <Sun size={20} />}
           </button>
 
           {!isMounted || isPending ? (
@@ -192,13 +173,13 @@ const Navbar = () => {
               </Link>
             </>
           ) : (
-            <div className="relative">
-
+            <div
+              className="relative"
+              onMouseEnter={() => setIsDropdownOpen(true)}
+              onMouseLeave={() => setIsDropdownOpen(false)}
+            >
               {/* Profile Button */}
-              <button
-                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="flex items-center gap-2 rounded-xl border border-gray-200 p-2 transition hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800"
-              >
+              <button className="flex items-center gap-2 rounded-xl border border-gray-200 p-2 transition hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800">
                 {user.image ? (
                   <Image
                     src={user.image}
@@ -219,53 +200,61 @@ const Navbar = () => {
 
                 <ChevronDown
                   size={17}
-                  className="text-gray-600 dark:text-gray-300"
+                  className={`text-gray-600 transition-transform dark:text-gray-300 ${
+                    isDropdownOpen ? "rotate-180" : ""
+                  }`}
                 />
               </button>
 
               {/* Profile Dropdown */}
               {isDropdownOpen && (
-                <div className="absolute right-0 top-14 w-60 rounded-xl border border-gray-100 bg-white p-2 shadow-xl dark:border-gray-700 dark:bg-gray-800">
+                <div className="absolute right-0 top-full w-60 pt-2">
+                  <div className="rounded-xl border border-gray-100 bg-white p-2 shadow-xl dark:border-gray-700 dark:bg-gray-800">
+                    <DropdownLink
+                      href="/dashboard"
+                      icon={<LayoutDashboard size={18} />}
+                      label="Dashboard"
+                      onClick={() => setIsDropdownOpen(false)}
+                    />
 
-                  <DropdownLink
-                    href="/dashboard"
-                    icon={<LayoutDashboard size={18} />}
-                    label="Dashboard"
-                  />
+                    <DropdownLink
+                      href="/add-studio"
+                      icon={<PlusCircle size={18} />}
+                      label="Add New Studio"
+                      onClick={() => setIsDropdownOpen(false)}
+                    />
 
-                  <DropdownLink
-                    href="/add-studio"
-                    icon={<PlusCircle size={18} />}
-                    label="Add New Studio"
-                  />
+                    <DropdownLink
+                      href="/my-listings"
+                      icon={<Building2 size={18} />}
+                      label="My Studio Listings"
+                      onClick={() => setIsDropdownOpen(false)}
+                    />
 
-                  <DropdownLink
-                    href="/my-listings"
-                    icon={<Building2 size={18} />}
-                    label="My Studio Listings"
-                  />
+                    <DropdownLink
+                      href="/my-bookings"
+                      icon={<CalendarDays size={18} />}
+                      label="My Bookings"
+                      onClick={() => setIsDropdownOpen(false)}
+                    />
 
-                  <DropdownLink
-                    href="/my-bookings"
-                    icon={<CalendarDays size={18} />}
-                    label="My Bookings"
-                  />
+                    <DropdownLink
+                      href="/host-bookings"
+                      icon={<CalendarDays size={18} />}
+                      label="Host Bookings"
+                      onClick={() => setIsDropdownOpen(false)}
+                    />
 
-                  <DropdownLink
-                    href="/host-bookings"
-                    icon={<CalendarDays size={18} />}
-                    label="Host Bookings"
-                  />
+                    <hr className="my-2 border-gray-100 dark:border-gray-700" />
 
-                  <hr className="my-2 border-gray-100 dark:border-gray-700" />
-
-                  <button
-                    onClick={handleLogout}
-                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-red-500 transition hover:bg-red-50 dark:hover:bg-red-950"
-                  >
-                    <LogOut size={18} />
-                    Logout
-                  </button>
+                    <button
+                      onClick={handleLogout}
+                      className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-red-500 transition hover:bg-red-50 dark:hover:bg-red-950"
+                    >
+                      <LogOut size={18} />
+                      Logout
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
@@ -285,18 +274,14 @@ const Navbar = () => {
       {/* Mobile Navigation */}
       {isMenuOpen && (
         <div className="border-t border-gray-100 bg-white px-5 py-5 shadow-lg dark:border-gray-700 dark:bg-gray-900 lg:hidden">
-
           <div className="flex flex-col gap-4">
-
             {/* Mobile Links */}
             {navLinks.map((link) => (
               <Link
                 key={link.name}
                 href={link.href}
                 onClick={
-                  link.name === "How It Works"
-                    ? handleHowItWorks
-                    : closeMenu
+                  link.name === "How It Works" ? handleHowItWorks : closeMenu
                 }
                 className={`font-semibold ${
                   isActive(link.href)
@@ -332,7 +317,6 @@ const Navbar = () => {
               <div className="h-10 animate-pulse rounded-lg bg-gray-100 dark:bg-gray-800" />
             ) : !user ? (
               <div className="flex gap-3">
-
                 <Link
                   href="/login"
                   onClick={closeMenu}
@@ -351,7 +335,6 @@ const Navbar = () => {
               </div>
             ) : (
               <>
-
                 {/* Mobile Profile */}
                 <div className="flex items-center gap-3">
                   {user.image ? (
