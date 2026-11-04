@@ -1,3 +1,4 @@
+import { connection } from "next/server";
 import { Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -11,20 +12,22 @@ import {
   CheckCircle2,
   Camera,
 } from "lucide-react";
+import BookingForm from "@/app/components/studios/BookingForm";
 
 async function StudioDetailsContent({ params }) {
+  await connection();
   const { id } = await params;
 
   let studio = null;
   let errorMessage = "";
 
   try {
-    const res = await fetch(
-      `${process.env.SERVER_API_URL}/api/studios/${id}`,
-      {
-        cache: "no-store",
-      }
-    );
+    const res = await fetch(`${process.env.SERVER_API_URL}/api/studios/${id}`, {
+      headers: {
+        "x-internal-api-key": process.env.INTERNAL_API_SECRET,
+      },
+      cache: "no-store",
+    });
 
     const result = await res.json();
 
@@ -45,9 +48,7 @@ async function StudioDetailsContent({ params }) {
           <Camera size={35} className="text-gray-400" />
         </div>
 
-        <h2 className="text-2xl font-bold text-gray-900">
-          Studio Not Found
-        </h2>
+        <h2 className="text-2xl font-bold text-gray-900">Studio Not Found</h2>
 
         <p className="mt-3 max-w-md text-gray-500">
           {errorMessage || "The studio you are looking for does not exist."}
@@ -63,9 +64,7 @@ async function StudioDetailsContent({ params }) {
     );
   }
 
-  const amenities = Array.isArray(studio.amenities)
-    ? studio.amenities
-    : [];
+  const amenities = Array.isArray(studio.amenities) ? studio.amenities : [];
 
   return (
     <main className="min-h-screen bg-gray-50 pb-20">
@@ -117,10 +116,7 @@ async function StudioDetailsContent({ params }) {
                 </h1>
 
                 <div className="flex items-center gap-1 rounded-lg bg-yellow-50 px-3 py-2">
-                  <Star
-                    size={18}
-                    className="fill-yellow-400 text-yellow-400"
-                  />
+                  <Star size={18} className="fill-yellow-400 text-yellow-400" />
 
                   <span className="font-bold text-gray-900">
                     {studio.rating || "New"}
@@ -148,8 +144,7 @@ async function StudioDetailsContent({ params }) {
               </h2>
 
               <p className="mt-4 leading-8 text-gray-600">
-                {studio.overview ||
-                  "No description available for this studio."}
+                {studio.overview || "No description available for this studio."}
               </p>
             </section>
 
@@ -176,17 +171,13 @@ async function StudioDetailsContent({ params }) {
                   ))}
                 </div>
               ) : (
-                <p className="mt-4 text-gray-500">
-                  No amenities listed.
-                </p>
+                <p className="mt-4 text-gray-500">No amenities listed.</p>
               )}
             </section>
 
             {/* Host Information */}
             <section className="border-t border-gray-200 pt-8">
-              <h2 className="text-2xl font-bold text-gray-900">
-                Hosted By
-              </h2>
+              <h2 className="text-2xl font-bold text-gray-900">Hosted By</h2>
 
               <div className="mt-5 flex items-center gap-4 rounded-xl border border-gray-200 bg-white p-5">
                 <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gray-100 text-xl font-bold text-gray-700">
@@ -198,15 +189,10 @@ async function StudioDetailsContent({ params }) {
                     {studio.hostName || "Studio Host"}
                   </h3>
 
-                  <p className="mt-1 text-sm text-gray-500">
-                    Studio Host
-                  </p>
+                  <p className="mt-1 text-sm text-gray-500">Studio Host</p>
                 </div>
 
-                <ShieldCheck
-                  size={24}
-                  className="ml-auto text-green-600"
-                />
+                <ShieldCheck size={24} className="ml-auto text-green-600" />
               </div>
             </section>
           </div>
@@ -224,9 +210,7 @@ async function StudioDetailsContent({ params }) {
 
               <div className="mt-6 space-y-4 border-y border-gray-100 py-5">
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-500">
-                    Hourly Rate
-                  </span>
+                  <span className="text-gray-500">Hourly Rate</span>
 
                   <span className="font-semibold text-gray-900">
                     ${studio.hourlyRate}
@@ -234,9 +218,7 @@ async function StudioDetailsContent({ params }) {
                 </div>
 
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-500">
-                    Security Deposit
-                  </span>
+                  <span className="text-gray-500">Security Deposit</span>
 
                   <span className="font-semibold text-gray-900">
                     ${studio.securityDeposit || 0}
@@ -244,9 +226,7 @@ async function StudioDetailsContent({ params }) {
                 </div>
 
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-500">
-                    Maximum Capacity
-                  </span>
+                  <span className="text-gray-500">Maximum Capacity</span>
 
                   <span className="font-semibold text-gray-900">
                     {studio.maxCapacity} People
@@ -259,17 +239,7 @@ async function StudioDetailsContent({ params }) {
                 Flexible hourly booking
               </div>
 
-              <button
-                type="button"
-                disabled
-                className="mt-6 w-full cursor-not-allowed rounded-xl bg-gray-300 py-4 font-semibold text-gray-600"
-              >
-                Booking Coming Soon
-              </button>
-
-              <p className="mt-4 text-center text-xs leading-5 text-gray-400">
-                Booking functionality will be available soon.
-              </p>
+              <BookingForm studio={studio} />
             </div>
           </aside>
         </div>
