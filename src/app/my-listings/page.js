@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { PlusCircle, MapPin, Building2 } from "lucide-react";
 
 import { auth } from "@/lib/auth";
+import DeleteStudioButton from "../dashboard/DeleteStudioButton";
 
 export const metadata = {
   title: "My Studio Listings | StudioSpace",
@@ -141,6 +142,7 @@ async function MyListingsContent() {
                     >
                       View Details
                     </Link>
+                    <DeleteStudioButton studioId={studio._id} />
                   </div>
                 </div>
               </div>
