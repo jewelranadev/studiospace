@@ -122,11 +122,11 @@ try {
 
   const result = JSON.parse(text);
 
-  if (response.status === 401) {
-    toast.error("Please login to create a studio.");
-    router.push("/login");
-    return;
-  }
+  if (response.status === 401 && result.message === "Please login first") {
+  toast.error("Your session has expired. Please login again.");
+  router.push("/login");
+  return;
+}
 
   if (!response.ok || !result.success) {
     throw new Error(result.message || "Failed to create studio.");
