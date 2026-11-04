@@ -4,7 +4,7 @@ import Link from "next/link";
 import { CalendarDays, Clock, MapPin } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { Suspense } from "react";
-
+import CancelBookingButton from "@/app/components/bookings/CancelBookingButton";
 
 export default function MyBookingsPage() {
   return (
@@ -40,7 +40,7 @@ async function MyBookingsContent() {
           "x-user-email": session.user.email,
         },
         cache: "no-store",
-      }
+      },
     );
 
     const result = await response.json();
@@ -56,9 +56,7 @@ async function MyBookingsContent() {
     <main className="min-h-screen bg-gray-50 px-4 py-12">
       <div className="mx-auto max-w-6xl">
         <div className="mb-10">
-          <h1 className="text-3xl font-bold text-gray-900">
-            My Bookings
-          </h1>
+          <h1 className="text-3xl font-bold text-gray-900">My Bookings</h1>
 
           <p className="mt-2 text-gray-500">
             Manage and track your studio bookings.
@@ -116,16 +114,17 @@ async function MyBookingsContent() {
                       ${booking.totalPrice}
                     </span>
                   </div>
+
+                  {booking.status === "pending" && (
+                    <CancelBookingButton bookingId={booking._id.toString()} />
+                  )}
                 </div>
               </div>
             ))}
           </div>
         ) : (
           <div className="rounded-2xl border border-gray-200 bg-white px-6 py-16 text-center">
-            <CalendarDays
-              size={45}
-              className="mx-auto text-gray-400"
-            />
+            <CalendarDays size={45} className="mx-auto text-gray-400" />
 
             <h2 className="mt-5 text-xl font-bold text-gray-900">
               No Bookings Yet
