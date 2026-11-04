@@ -26,27 +26,27 @@ const FeaturedStudios = async () => {
   }
 
   return (
-    <section className="bg-gray-50 px-4 py-20 md:px-10 lg:px-20">
+    <section className="bg-gray-50 px-4 py-20 transition-colors duration-300 dark:bg-gray-950 md:px-10 lg:px-20">
       <div className="mx-auto max-w-7xl">
         {/* Section Heading */}
         <div className="mb-10 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
           <div>
-            <p className="mb-2 font-semibold tracking-widest text-purple-600">
+            <p className="mb-2 font-semibold tracking-widest text-purple-600 dark:text-purple-400">
               DISCOVER YOUR SPACE
             </p>
 
-            <h2 className="text-3xl font-bold text-gray-900 md:text-4xl">
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white md:text-4xl">
               Featured Studios
             </h2>
 
-            <p className="mt-3 text-gray-500">
+            <p className="mt-3 text-gray-600 dark:text-gray-400">
               Explore our most popular creative spaces.
             </p>
           </div>
 
           <Link
             href="/studios"
-            className="flex items-center gap-2 font-semibold text-purple-600 transition hover:gap-3"
+            className="flex items-center gap-2 font-semibold text-purple-600 transition-all duration-300 hover:gap-3 dark:text-purple-400"
           >
             Explore All Studios
             <ArrowRight size={18} />
@@ -59,7 +59,7 @@ const FeaturedStudios = async () => {
             {studios.map((studio) => (
               <div
                 key={studio._id}
-                className="group flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl"
+                className="group flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl dark:border-gray-800 dark:bg-gray-900 dark:hover:border-purple-500/50"
               >
                 {/* Studio Image */}
                 <div className="relative h-56 overflow-hidden">
@@ -72,7 +72,7 @@ const FeaturedStudios = async () => {
                   />
 
                   {/* Rating Badge */}
-                  <div className="absolute right-3 top-3 z-10 flex items-center gap-1 rounded-full bg-white px-3 py-1.5 text-sm font-semibold text-gray-900 shadow">
+                  <div className="absolute top-3 right-3 z-10 flex items-center gap-1 rounded-full bg-white px-3 py-1.5 text-sm font-semibold text-gray-900 shadow-md">
                     <Star
                       size={15}
                       className="fill-yellow-400 text-yellow-400"
@@ -85,35 +85,37 @@ const FeaturedStudios = async () => {
                 <div className="flex flex-1 flex-col p-5">
                   {/* Category */}
                   <div className="mb-3">
-                    <span className="rounded-full bg-purple-100 px-3 py-1 text-sm font-medium text-purple-700">
+                    <span className="rounded-full bg-purple-100 px-3 py-1 text-sm font-medium text-purple-700 dark:bg-purple-500/20 dark:text-purple-300">
                       {studio.category}
                     </span>
                   </div>
 
                   {/* Title */}
-                  <h3 className="mb-2 text-xl font-bold text-gray-900 transition-colors group-hover:text-purple-700">
+                  <h3 className="mb-2 text-xl font-bold text-gray-900 transition-colors group-hover:text-purple-700 dark:text-white dark:group-hover:text-purple-400">
                     {studio.title}
                   </h3>
 
                   {/* Location */}
-                  <p className="mb-5 flex items-center gap-2 text-sm text-gray-500">
+                  <p className="mb-5 flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                     <MapPin size={16} className="shrink-0" />
                     {studio.location}
                   </p>
 
                   {/* Price and Details Button */}
-                  <div className="mt-auto flex items-center justify-between border-t border-gray-200 pt-4">
+                  <div className="mt-auto flex items-center justify-between border-t border-gray-200 pt-4 dark:border-gray-700">
                     <div>
-                      <p className="text-lg font-bold text-purple-600">
+                      <p className="text-lg font-bold text-purple-600 dark:text-purple-400">
                         ${studio.hourlyRate}
                       </p>
 
-                      <span className="text-sm text-gray-500">Per Hour</span>
+                      <span className="text-sm text-gray-500 dark:text-gray-400">
+                        Per Hour
+                      </span>
                     </div>
 
                     <Link
                       href={`/studios/${studio._id}`}
-                      className="rounded-lg bg-gray-900 px-4 py-2.5 text-sm font-semibold text-white transition-all duration-300 hover:bg-purple-700"
+                      className="rounded-lg bg-gray-900 px-4 py-2.5 text-sm font-semibold text-white transition-all duration-300 hover:bg-purple-700 dark:bg-purple-600 dark:hover:bg-purple-700"
                     >
                       View Details
                     </Link>
@@ -123,13 +125,13 @@ const FeaturedStudios = async () => {
             ))}
           </div>
         ) : (
-          // Empty State
-          <div className="rounded-2xl border border-gray-200 bg-white py-16 text-center">
-            <h3 className="text-xl font-semibold text-gray-800">
+          /* Empty State */
+          <div className="rounded-2xl border border-gray-200 bg-white py-16 text-center dark:border-gray-800 dark:bg-gray-900">
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
               No Studios Available
             </h3>
 
-            <p className="mt-2 text-gray-500">
+            <p className="mt-2 text-gray-600 dark:text-gray-400">
               There are no featured studios available right now.
             </p>
 
