@@ -3,8 +3,24 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { CalendarDays, Clock, MapPin } from "lucide-react";
 import { auth } from "@/lib/auth";
+import { Suspense } from "react";
 
-export default async function MyBookingsPage() {
+
+export default function MyBookingsPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-[60vh] items-center justify-center">
+          <p className="text-gray-500">Loading bookings...</p>
+        </div>
+      }
+    >
+      <MyBookingsContent />
+    </Suspense>
+  );
+}
+
+async function MyBookingsContent() {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
