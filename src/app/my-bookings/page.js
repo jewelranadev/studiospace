@@ -5,6 +5,7 @@ import { CalendarDays, Clock, MapPin } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { Suspense } from "react";
 import CancelBookingButton from "@/app/components/bookings/CancelBookingButton";
+import BookingStatus from "@/app/components/bookings/BookingStatus";
 
 export default function MyBookingsPage() {
   return (
@@ -76,7 +77,7 @@ async function MyBookingsContent() {
                   </h2>
 
                   <span
-                    className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                    className={`rounded-full px-3 py-1 text-sm font-semibold ${
                       booking.status === "confirmed"
                         ? "bg-green-100 text-green-700"
                         : booking.status === "cancelled"
@@ -84,7 +85,7 @@ async function MyBookingsContent() {
                           : "bg-yellow-100 text-yellow-700"
                     }`}
                   >
-                    {booking.status}
+                    <BookingStatus status={booking.status} />
                   </span>
                 </div>
 

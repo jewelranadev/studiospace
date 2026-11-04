@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import ConfirmBookingButton from "@/app/components/bookings/ConfirmBookingButton";
+import BookingStatus from "@/app/components/bookings/BookingStatus";
 
 export default function HostBookingsPage() {
   return (
@@ -83,7 +84,7 @@ async function HostBookingsContent() {
                         : "bg-yellow-100 text-yellow-700"
                   }`}
                 >
-                  {booking.status}
+                 <BookingStatus status={booking.status} />
                 </span>
               </div>
 
