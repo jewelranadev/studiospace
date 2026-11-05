@@ -4,7 +4,6 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
-<<<<<<< HEAD
 import {
   describeError,
   notifyError,
@@ -20,10 +19,9 @@ import {
   Camera,
   Globe,
 } from "lucide-react";
-=======
+
 import { toast } from "sonner";
 import { Mail, Lock, Eye, EyeOff, Camera, Globe } from "lucide-react";
->>>>>>> 454f67d (remove forgot password functionality)
 
 export default function LoginPage() {
   const router = useRouter();

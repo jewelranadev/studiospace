@@ -22,17 +22,7 @@ if (process.env.NODE_ENV === "development") {
 }
 
 const db = mongoClient.db("studiospace");
-<<<<<<< HEAD
-const getResend = () => {
-  if (!process.env.RESEND_API_KEY) {
-    throw new Error("RESEND_API_KEY is missing");
-  }
 
-  return new Resend(process.env.RESEND_API_KEY);
-};
-=======
-
->>>>>>> 454f67d (remove forgot password functionality)
 
 export const auth = betterAuth({
   database: mongodbAdapter(db, {
