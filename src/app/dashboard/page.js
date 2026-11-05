@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { headers } from "next/headers";
+import { connection } from "next/server";
 import { redirect } from "next/navigation";
 import {
   Building2,
@@ -45,10 +46,40 @@ export default function DashboardPage() {
 }
 
 async function DashboardContent() {
-  // Verify the logged-in user with Better Auth
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+  await connection();
+
+  let session = null;
+  let sessionFailed = false;
+
+  try {
+    session = await auth.api.getSession({
+      headers: await headers(),
+    });
+  } catch (error) {
+    console.error("Dashboard session error:", error);
+    sessionFailed = true;
+  }
+
+  if (sessionFailed) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900">
+            We couldn&apos;t verify your session
+          </h1>
+          <p className="mt-2 text-gray-500">
+            Something went wrong on our side. Please try again in a moment.
+          </p>
+          <a
+            href="/dashboard"
+            className="mt-5 inline-block rounded-lg bg-violet-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-violet-700"
+          >
+            Try Again
+          </a>
+        </div>
+      </main>
+    );
+  }
 
   if (!session?.user) {
     redirect("/login");
@@ -57,7 +88,6 @@ async function DashboardContent() {
   const user = session.user;
   const firstName = user.name?.split(" ")[0] || "there";
 
-  // Fetch only the studios owned by this user
   let studios = [];
 
   try {
@@ -67,12 +97,16 @@ async function DashboardContent() {
         "x-user-email": user.email,
       },
       cache: "no-store",
+
+      signal: AbortSignal.timeout(25000),
     });
 
     const result = await res.json();
 
     if (res.ok && result.success) {
       studios = result.data || [];
+    } else {
+      console.error("Dashboard Studios API error:", res.status, result);
     }
   } catch (error) {
     console.error("Dashboard Studios Error:", error);
@@ -99,10 +133,11 @@ async function DashboardContent() {
                   alt={user.name || "Profile"}
                   width={64}
                   height={64}
+                  unoptimized
                   className="h-16 w-16 rounded-full object-cover"
                 />
               ) : (
-                (user.name?.charAt(0)?.toUpperCase() || "U")
+                user.name?.charAt(0)?.toUpperCase() || "U"
               )}
             </div>
 
@@ -179,6 +214,7 @@ async function DashboardContent() {
                         alt={studio.title}
                         fill
                         sizes="96px"
+                        unoptimized
                         className="object-cover"
                       />
                     </div>
