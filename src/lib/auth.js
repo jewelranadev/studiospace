@@ -3,7 +3,7 @@ import { mongodbAdapter } from "@better-auth/mongo-adapter";
 import { jwt } from "better-auth/plugins";
 import { MongoClient } from "mongodb";
 import { attachDatabasePool } from "@vercel/functions";
-import { Resend } from "resend";
+
 
 const uri = process.env.MONGODB_URI;
 
@@ -22,6 +22,7 @@ if (process.env.NODE_ENV === "development") {
 }
 
 const db = mongoClient.db("studiospace");
+<<<<<<< HEAD
 const getResend = () => {
   if (!process.env.RESEND_API_KEY) {
     throw new Error("RESEND_API_KEY is missing");
@@ -29,6 +30,9 @@ const getResend = () => {
 
   return new Resend(process.env.RESEND_API_KEY);
 };
+=======
+
+>>>>>>> 454f67d (remove forgot password functionality)
 
 export const auth = betterAuth({
   database: mongodbAdapter(db, {
@@ -48,17 +52,7 @@ export const auth = betterAuth({
     maxPasswordLength: 128,
     autoSignIn: true,
 
-    sendResetPassword: async ({ user, url }) => {
-      await resend.emails.send({
-        from: process.env.RESEND_FROM_EMAIL,
-        to: user.email,
-        subject: "Reset Your StudioSpace Password",
-        html: `<h2>Reset Your Password</h2>
-          <p>Hello ${user.name || "User"},</p>
-          <p>Click below to reset your password.</p>
-          <a href="${url}">Reset Password</a>`,
-      });
-    },
+  
   },
 
   session: {

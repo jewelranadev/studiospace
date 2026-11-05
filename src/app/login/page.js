@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
+<<<<<<< HEAD
 import {
   describeError,
   notifyError,
@@ -19,6 +20,10 @@ import {
   Camera,
   Globe,
 } from "lucide-react";
+=======
+import { toast } from "sonner";
+import { Mail, Lock, Eye, EyeOff, Camera, Globe } from "lucide-react";
+>>>>>>> 454f67d (remove forgot password functionality)
 
 export default function LoginPage() {
   const router = useRouter();
@@ -111,23 +116,18 @@ export default function LoginPage() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12">
       <div className="w-full max-w-md rounded-2xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8">
-
         {/* Logo */}
         <Link href="/" className="flex items-center justify-center gap-2">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-black text-white">
             <Camera size={22} />
           </div>
 
-          <span className="text-2xl font-bold text-gray-900">
-            StudioSpace
-          </span>
+          <span className="text-2xl font-bold text-gray-900">StudioSpace</span>
         </Link>
 
         {/* Heading */}
         <div className="mt-8 text-center">
-          <h1 className="text-2xl font-bold text-gray-900">
-            Welcome Back!
-          </h1>
+          <h1 className="text-2xl font-bold text-gray-900">Welcome Back!</h1>
 
           <p className="mt-2 text-sm text-gray-500">
             Login to continue your creative journey.
@@ -136,7 +136,6 @@ export default function LoginPage() {
 
         {/* Login Form */}
         <form onSubmit={handleSubmit} className="mt-8 space-y-5">
-
           {/* Email */}
           <div>
             <label className="mb-2 block text-sm font-semibold text-gray-700">
@@ -168,12 +167,14 @@ export default function LoginPage() {
                 Password
               </label>
 
-              <Link
-                href="/forgot-password"
-                className="text-xs font-semibold text-gray-600 hover:text-black hover:underline"
+              <button
+                type="button"
+                onClick={() =>
+                  toast.info("Password recovery is currently unavailable.")
+                }
               >
                 Forgot Password?
-              </Link>
+              </button>
             </div>
 
             <div className="relative">
@@ -245,4 +246,3 @@ export default function LoginPage() {
     </main>
   );
 }
-
