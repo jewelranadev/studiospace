@@ -22,6 +22,11 @@ export default function DeleteStudioButton({ studioId }) {
         method: "DELETE",
       });
 
+      if (res.status === 401) {
+        router.push("/login");
+        return;
+      }
+
       const result = await res.json();
 
       if (!res.ok || !result.success) {

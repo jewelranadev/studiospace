@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import { headers } from "next/headers";
+import { connection } from "next/server";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import ConfirmBookingButton from "@/app/components/bookings/ConfirmBookingButton";
@@ -21,27 +22,53 @@ export default function HostBookingsPage() {
 }
 
 async function HostBookingsContent() {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+  await connection();
+
+  let session = null;
+
+  try {
+    session = await auth.api.getSession({
+      headers: await headers(),
+    });
+  } catch (error) {
+    console.error("Host Bookings session error:", error);
+    session = null;
+  }
 
   if (!session?.user) {
     redirect("/login");
   }
 
-  const response = await fetch(
-    `${process.env.SERVER_API_URL}/api/bookings/host-bookings`,
-    {
-      headers: {
-        "x-internal-api-key": process.env.INTERNAL_API_SECRET,
-        "x-user-email": session.user.email,
-      },
-      cache: "no-store",
-    },
-  );
+  let bookings = [];
 
-  const result = await response.json();
-  const bookings = result.success ? result.data : [];
+  try {
+    const response = await fetch(
+      `${process.env.SERVER_API_URL}/api/bookings/host-bookings`,
+      {
+        headers: {
+          "x-internal-api-key": process.env.INTERNAL_API_SECRET,
+          "x-user-email": session.user.email,
+          "x-user-id": session.user.id,
+          "x-user-name": encodeURIComponent(session.user.name || ""),
+        },
+        cache: "no-store",
+        signal: AbortSignal.timeout(25000),
+      },
+    );
+
+    const text = await response.text();
+    let result;
+
+    try {
+      result = JSON.parse(text);
+    } catch {
+      throw new Error("Invalid response from API server");
+    }
+
+    bookings = result.success ? result.data || [] : [];
+  } catch (error) {
+    console.error("Host Bookings Page Error:", error);
+  }
 
   return (
     <div className="mx-auto min-h-screen max-w-6xl px-4 py-12">

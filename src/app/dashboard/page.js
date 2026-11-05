@@ -95,13 +95,22 @@ async function DashboardContent() {
       headers: {
         "x-internal-api-key": process.env.INTERNAL_API_SECRET,
         "x-user-email": user.email,
+        "x-user-id": user.id,
+        "x-user-name": encodeURIComponent(user.name || ""),
       },
       cache: "no-store",
 
       signal: AbortSignal.timeout(25000),
     });
 
-    const result = await res.json();
+    const text = await res.text();
+    let result;
+
+    try {
+      result = JSON.parse(text);
+    } catch {
+      throw new Error("Invalid response from API server");
+    }
 
     if (res.ok && result.success) {
       studios = result.data || [];

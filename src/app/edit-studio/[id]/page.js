@@ -423,6 +423,7 @@ function EditStudioContent() {
                     alt="Studio Preview"
                     width={800}
                     height={400}
+                    unoptimized
                     className="h-52 w-full rounded-xl object-cover"
                   />
                 </div>

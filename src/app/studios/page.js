@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { connection } from "next/server";
 import {
 MapPin,
 Star,
@@ -19,6 +20,7 @@ const categories = [
 
 // Fetch Studios
 const StudiosContent = async ({ searchParams }) => {
+await connection();
 const params = await searchParams;
 const selectedCategory = params?.category || "";
 
@@ -29,18 +31,17 @@ const query = selectedCategory
 ? `?category=${encodeURIComponent(selectedCategory)}`
 : "";
 
-
-// Debugging
-console.log("Selected Category:", selectedCategory);
-console.log(
-  "API URL:",
-  `${process.env.SERVER_API_URL}/api/studios${query}`
-);
-
 const res = await fetch(
   `${process.env.SERVER_API_URL}/api/studios${query}`,
   {
+    headers: {
+      "x-internal-api-key": process.env.INTERNAL_API_SECRET,
+      "x-user-email": "",
+      "x-user-id": "",
+      "x-user-name": "",
+    },
     cache: "no-store",
+    signal: AbortSignal.timeout(25000),
   }
 );
 
@@ -48,9 +49,14 @@ if (!res.ok) {
   throw new Error("Failed to fetch studios");
 }
 
-const result = await res.json();
+const text = await res.text();
+let result;
 
-console.log("Fetched Studios:", result.data);
+try {
+  result = JSON.parse(text);
+} catch {
+  throw new Error("Invalid response from API server");
+}
 
 studios = result.data || [];
 
@@ -83,6 +89,7 @@ return (
               src={studio.image}
               alt={studio.title}
               fill
+              unoptimized
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
               className="object-cover transition-transform duration-500 group-hover:scale-110"
             />

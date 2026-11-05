@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 export default function BookingForm({ studio }) {
@@ -8,6 +9,7 @@ const [date, setDate] = useState("");
 const [startTime, setStartTime] = useState("");
 const [endTime, setEndTime] = useState("");
 const [loading, setLoading] = useState(false);
+const router = useRouter();
 
 const totalHours =
 startTime && endTime
@@ -50,6 +52,11 @@ try {
       endTime,
     }),
   });
+
+  if (res.status === 401) {
+    router.push("/login");
+    return;
+  }
 
   const result = await res.json();
 

@@ -24,12 +24,26 @@ export async function PATCH(request, { params }) {
         headers: {
           "x-internal-api-key": process.env.INTERNAL_API_SECRET,
           "x-user-email": session.user.email,
+          "x-user-id": session.user.id,
+          "x-user-name": encodeURIComponent(session.user.name || ""),
         },
         cache: "no-store",
+        signal: AbortSignal.timeout(25000),
       }
     );
 
-    const result = await response.json();
+    const text = await response.text();
+    let result;
+
+    try {
+      result = JSON.parse(text);
+    } catch {
+      console.error("Express cancel non-JSON:", response.status, text);
+      return NextResponse.json(
+        { success: false, message: "Invalid response from API server" },
+        { status: 502 }
+      );
+    }
 
     return NextResponse.json(result, {
       status: response.status,

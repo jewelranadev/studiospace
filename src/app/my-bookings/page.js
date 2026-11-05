@@ -1,4 +1,5 @@
 import { headers } from "next/headers";
+import { connection } from "next/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { CalendarDays, Clock, MapPin } from "lucide-react";
@@ -22,9 +23,18 @@ export default function MyBookingsPage() {
 }
 
 async function MyBookingsContent() {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+  await connection();
+
+  let session = null;
+
+  try {
+    session = await auth.api.getSession({
+      headers: await headers(),
+    });
+  } catch (error) {
+    console.error("My Bookings session error:", error);
+    session = null;
+  }
 
   if (!session?.user) {
     redirect("/login");
@@ -39,15 +49,25 @@ async function MyBookingsContent() {
         headers: {
           "x-internal-api-key": process.env.INTERNAL_API_SECRET,
           "x-user-email": session.user.email,
+          "x-user-id": session.user.id,
+          "x-user-name": encodeURIComponent(session.user.name || ""),
         },
         cache: "no-store",
+        signal: AbortSignal.timeout(25000),
       },
     );
 
-    const result = await response.json();
+    const text = await response.text();
+    let result;
+
+    try {
+      result = JSON.parse(text);
+    } catch {
+      throw new Error("Invalid response from API server");
+    }
 
     if (result.success) {
-      bookings = result.data;
+      bookings = result.data || [];
     }
   } catch (error) {
     console.error("My Bookings Page Error:", error);

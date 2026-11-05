@@ -186,6 +186,7 @@ const Navbar = () => {
                     alt="Profile"
                     width={36}
                     height={36}
+                    unoptimized
                     className="h-9 w-9 rounded-full object-cover"
                   />
                 ) : (
@@ -343,6 +344,7 @@ const Navbar = () => {
                       alt="Profile"
                       width={40}
                       height={40}
+                      unoptimized
                       className="h-10 w-10 rounded-full object-cover"
                     />
                   ) : (
