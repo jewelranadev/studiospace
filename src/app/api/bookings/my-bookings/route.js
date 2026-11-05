@@ -1,17 +1,18 @@
-import { headers } from "next/headers";
-import { NextResponse } from "next/server";
+import { NextResponse, connection } from "next/server";
 import { auth } from "@/lib/auth";
 
-export async function GET() {
-  try {
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
+export async function GET(request) {
 
+  await connection();
+  try {
+    
+    const session = await auth.api.getSession({
+      headers: request.headers,
+    });
     if (!session?.user) {
       return NextResponse.json(
         { success: false, message: "Please login first" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -26,7 +27,7 @@ export async function GET() {
         },
         cache: "no-store",
         signal: AbortSignal.timeout(25000),
-      }
+      },
     );
 
     const text = await response.text();
@@ -38,7 +39,7 @@ export async function GET() {
       console.error("Express my-bookings non-JSON:", response.status, text);
       return NextResponse.json(
         { success: false, message: "Invalid response from API server" },
-        { status: 502 }
+        { status: 502 },
       );
     }
 
@@ -52,7 +53,7 @@ export async function GET() {
 
     return NextResponse.json(
       { success: false, message: "Failed to fetch bookings" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

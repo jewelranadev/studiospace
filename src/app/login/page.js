@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 
 import { toast } from "sonner";
-import { Mail, Lock, Eye, EyeOff, Camera, Globe } from "lucide-react";
+
 
 export default function LoginPage() {
   const router = useRouter();
