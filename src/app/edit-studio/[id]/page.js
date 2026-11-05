@@ -3,7 +3,14 @@
 import { Suspense, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
-import { toast } from "sonner";
+import {
+  apiErrorMessage,
+  describeError,
+  notifyError,
+  notifyLoading,
+  notifySuccess,
+  SESSION_EXPIRED_MESSAGE,
+} from "@/lib/notify";
 
 const initialForm = {
   title: "",
@@ -64,13 +71,15 @@ function EditStudioContent() {
         const result = await response.json();
 
         if (response.status === 401) {
-          toast.error("Please login to continue.");
+          notifyError(SESSION_EXPIRED_MESSAGE);
           router.push("/login");
           return;
         }
 
         if (!response.ok || !result.success) {
-          throw new Error(result.message || "Failed to fetch studio");
+          throw new Error(
+            apiErrorMessage(response.status, result.message, "Failed to fetch studio")
+          );
         }
 
         const studio = result.data;
@@ -88,8 +97,9 @@ function EditStudioContent() {
 
         setAmenities(studio.amenities || []);
       } catch (err) {
-        setError(err.message || "Something went wrong.");
-        toast.error(err.message || "Failed to load studio information.");
+        const message = describeError(err, "Failed to load studio information.");
+        setError(message);
+        notifyError(message);
       } finally {
         setLoading(false);
       }
@@ -117,7 +127,7 @@ function EditStudioContent() {
     if (!value) return;
 
     if (amenities.some((item) => item.toLowerCase() === value.toLowerCase())) {
-      toast.error("This amenity has already been added.");
+      notifyError("This amenity has already been added.");
       setAmenityInput("");
       return;
     }
@@ -125,13 +135,13 @@ function EditStudioContent() {
     setAmenities((prev) => [...prev, value]);
     setAmenityInput("");
 
-    toast.success("Amenity added successfully!");
+    notifySuccess("Amenity added successfully!");
   };
 
   // Remove Amenity
   const removeAmenity = (itemToRemove) => {
     setAmenities((prev) => prev.filter((item) => item !== itemToRemove));
-    toast.success("Amenity removed.");
+    notifySuccess("Amenity removed.");
   };
 
   // Enter Key
@@ -146,12 +156,16 @@ function EditStudioContent() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (saving) return;
+
     if (amenities.length === 0) {
-      toast.error("Please add at least one studio amenity.");
+      notifyError("Please add at least one studio amenity.");
       return;
     }
 
     setSaving(true);
+
+    const loadingId = notifyLoading("Updating studio...");
 
     try {
       const response = await fetch(`/api/studios/${id}`, {
@@ -171,7 +185,13 @@ function EditStudioContent() {
       const text = await response.text();
 
       if (!text) {
-        throw new Error("Server returned an empty response.");
+        throw new Error(
+          apiErrorMessage(
+            response.status,
+            null,
+            "The server returned an empty response. Please try again."
+          )
+        );
       }
 
       let result;
@@ -179,26 +199,38 @@ function EditStudioContent() {
       try {
         result = JSON.parse(text);
       } catch {
-        throw new Error("Server returned an invalid JSON response.");
+        throw new Error(
+          apiErrorMessage(
+            response.status,
+            null,
+            "The server returned an unexpected response. Please try again."
+          )
+        );
       }
 
       if (response.status === 401) {
-        toast.error("Please login to continue.");
+        notifyError(SESSION_EXPIRED_MESSAGE, { id: loadingId });
         router.push("/login");
         return;
       }
 
       if (!response.ok || !result.success) {
-        throw new Error(result.message || "Failed to update studio.");
+        throw new Error(
+          apiErrorMessage(response.status, result.message, "Failed to update studio.")
+        );
       }
 
-      toast.success("Your studio has been updated successfully!");
+      notifySuccess("Your studio has been updated successfully!", {
+        id: loadingId,
+      });
 
       setTimeout(() => {
         router.push("/my-listings");
       }, 1500);
     } catch (err) {
-      toast.error(err.message || "Something went wrong.");
+      notifyError(describeError(err, "Failed to update studio."), {
+        id: loadingId,
+      });
     } finally {
       setSaving(false);
     }
@@ -423,6 +455,7 @@ function EditStudioContent() {
                     alt="Studio Preview"
                     width={800}
                     height={400}
+                    unoptimized
                     className="h-52 w-full rounded-xl object-cover"
                   />
                 </div>

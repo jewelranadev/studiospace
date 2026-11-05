@@ -25,12 +25,23 @@ try {
 const res = await fetch(`${process.env.SERVER_API_URL}/api/studios/${id}`, {
 headers: {
 "x-internal-api-key": process.env.INTERNAL_API_SECRET,
+"x-user-email": "",
+"x-user-id": "",
+"x-user-name": "",
 },
 cache: "no-store",
+signal: AbortSignal.timeout(25000),
 });
 
 
-const result = await res.json();
+const text = await res.text();
+let result;
+
+try {
+  result = JSON.parse(text);
+} catch {
+  throw new Error("Invalid response from API server");
+}
 
 if (!res.ok || !result.success) {
   errorMessage = result.message || "Studio not found";
@@ -87,6 +98,7 @@ Back to Studios </Link> </div>
           alt={studio.title}
           fill
           priority
+          unoptimized
           sizes="(max-width: 768px) 100vw, 1200px"
           className="object-cover"
         />

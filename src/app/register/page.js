@@ -4,7 +4,13 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
-import { toast } from "sonner";
+import {
+  describeError,
+  notifyError,
+  notifyLoading,
+  notifySuccess,
+  sanitizeMessage,
+} from "@/lib/notify";
 import {
 Mail,
 Lock,
@@ -38,23 +44,26 @@ setFormData({
 const handleSubmit = async (e) => {
 e.preventDefault();
 
+if (loading) return;
 
 if (!/[A-Z]/.test(formData.password)) {
-  toast.error("Password must contain at least one uppercase letter.");
+  notifyError("Password must contain at least one uppercase letter.");
   return;
 }
 
 if (!/[a-z]/.test(formData.password)) {
-  toast.error("Password must contain at least one lowercase letter.");
+  notifyError("Password must contain at least one lowercase letter.");
   return;
 }
 
 if (formData.password.length < 6) {
-  toast.error("Password must be at least 6 characters long.");
+  notifyError("Password must be at least 6 characters long.");
   return;
 }
 
 setLoading(true);
+
+const loadingId = notifyLoading("Creating your account...");
 
 try {
   const { error } = await authClient.signUp.email({
@@ -65,16 +74,21 @@ try {
   });
 
   if (error) {
-    toast.error(error.message || "Registration failed!");
+    notifyError(
+      sanitizeMessage(error.message) || "Registration failed. Please try again.",
+      { id: loadingId }
+    );
     return;
   }
 
-  toast.success("Account created successfully!");
+  notifySuccess("Account created successfully!", { id: loadingId });
 
   router.push("/login?registered=true");
 } catch (err) {
   console.error("Registration Error:", err);
-  toast.error(err.message || "Something went wrong. Please try again.");
+  notifyError(describeError(err, "Registration failed. Please try again."), {
+    id: loadingId,
+  });
 } finally {
   setLoading(false);
 }

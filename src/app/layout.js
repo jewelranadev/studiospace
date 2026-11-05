@@ -2,6 +2,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "./components/shared/Navbar";
 import Footer from "./components/shared/Footer";
+import AppToaster from "./components/shared/AppToaster";
 import { Suspense } from "react";
 
 const geistSans = Geist({
@@ -31,6 +32,7 @@ export default function RootLayout({ children }) {
         </Suspense>
         {children}
         <Footer />
+        <AppToaster />
       </body>
     </html>
   );

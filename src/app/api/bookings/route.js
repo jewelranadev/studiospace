@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 
+
 export async function POST(request) {
   try {
     const requestHeaders = await headers();
@@ -17,7 +18,19 @@ export async function POST(request) {
       );
     }
 
-    const body = await request.json();
+    let body;
+
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json(
+        { success: false, message: "Invalid request body" },
+        { status: 400 },
+      );
+    }
+
+  
+    const { studioId, date, startTime, endTime } = body;
 
     const response = await fetch(`${process.env.SERVER_API_URL}/api/bookings`, {
       method: "POST",
@@ -28,12 +41,7 @@ export async function POST(request) {
         "x-user-id": session.user.id,
         "x-user-name": encodeURIComponent(session.user.name || ""),
       },
-      body: JSON.stringify({
-        ...body,
-
-        userEmail: session.user.email,
-        userName: session.user.name,
-      }),
+      body: JSON.stringify({ studioId, date, startTime, endTime }),
       cache: "no-store",
       signal: AbortSignal.timeout(25000),
     });

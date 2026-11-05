@@ -35,7 +35,6 @@ export async function POST(request) {
         "x-user-id": session.user.id,
 
         "x-user-name": encodeURIComponent(session.user.name || ""),
-        Cookie: requestHeaders.get("cookie") || "",
       },
       body: JSON.stringify({
         ...body,
@@ -43,6 +42,7 @@ export async function POST(request) {
         hostEmail: session.user.email,
       }),
       cache: "no-store",
+      signal: AbortSignal.timeout(25000),
     });
 
     const text = await response.text();

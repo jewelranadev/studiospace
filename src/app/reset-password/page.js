@@ -4,6 +4,13 @@ import { Suspense, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
+import {
+  describeError,
+  notifyError,
+  notifyLoading,
+  notifySuccess,
+  sanitizeMessage,
+} from "@/lib/notify";
 import { Lock, Eye, EyeOff, Loader2, CheckCircle } from "lucide-react";
 
 function ResetPasswordForm() {
@@ -24,20 +31,30 @@ function ResetPasswordForm() {
     e.preventDefault();
     setError("");
 
+    if (loading) return;
+
     if (!token) {
-      setError("Invalid or expired reset link.");
+      const message = "Invalid or expired reset link.";
+      setError(message);
+      notifyError(message);
       return;
     }
 
     if (password.length < 6) {
-      setError("Password must be at least 6 characters.");
+      const message = "Password must be at least 6 characters.";
+      setError(message);
+      notifyError(message);
       return;
     }
 
     if (password !== confirmPassword) {
-      setError("Passwords do not match.");
+      const message = "Passwords do not match.";
+      setError(message);
+      notifyError(message);
       return;
     }
+
+    const loadingId = notifyLoading("Updating your password...");
 
     try {
       setLoading(true);
@@ -48,17 +65,23 @@ function ResetPasswordForm() {
       });
 
       if (error) {
-        setError(error.message || "Password reset failed.");
+        const message =
+          sanitizeMessage(error.message) || "Password reset failed.";
+        setError(message);
+        notifyError(message, { id: loadingId });
         return;
       }
 
       setSuccess(true);
+      notifySuccess("Password changed successfully!", { id: loadingId });
 
       setTimeout(() => {
         router.push("/login");
       }, 2000);
     } catch (err) {
-      setError("Something went wrong. Please try again.");
+      const message = describeError(err, "Something went wrong. Please try again.");
+      setError(message);
+      notifyError(message, { id: loadingId });
     } finally {
       setLoading(false);
     }

@@ -1,10 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
-import { toast } from "sonner";
+import {
+  describeError,
+  notifyError,
+  notifyLoading,
+  notifySuccess,
+  sanitizeMessage,
+} from "@/lib/notify";
 import {
   Mail,
   Lock,
@@ -26,14 +32,6 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
 
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-
-    if (params.get("registered") === "true") {
-      toast.success("Registration successful! Please login.");
-    }
-  }, []);
-
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -45,7 +43,11 @@ export default function LoginPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (loading) return;
+
     setLoading(true);
+
+    const loadingId = notifyLoading("Logging in...");
 
     try {
       const { error } = await authClient.signIn.email({
@@ -55,17 +57,22 @@ export default function LoginPage() {
       });
 
       if (error) {
-        toast.error(error.message || "Invalid email or password.");
+        notifyError(
+          sanitizeMessage(error.message) || "Invalid email or password.",
+          { id: loadingId }
+        );
         return;
       }
 
-      toast.success("Login successful!");
+      notifySuccess("Login successful!", { id: loadingId });
 
       router.push("/");
       router.refresh();
     } catch (err) {
       console.error("Login Error:", err);
-      toast.error("Something went wrong. Please try again.");
+      notifyError(describeError(err, "Login failed. Please try again."), {
+        id: loadingId,
+      });
     } finally {
       setLoading(false);
     }
@@ -73,7 +80,11 @@ export default function LoginPage() {
 
   // Google Login
   const handleGoogleLogin = async () => {
+    if (googleLoading) return;
+
     setGoogleLoading(true);
+
+    const loadingId = notifyLoading("Redirecting to Google...");
 
     try {
       const { error } = await authClient.signIn.social({
@@ -82,12 +93,17 @@ export default function LoginPage() {
       });
 
       if (error) {
-        toast.error(error.message || "Google login failed.");
+        notifyError(
+          sanitizeMessage(error.message) || "Google login failed.",
+          { id: loadingId }
+        );
         setGoogleLoading(false);
       }
     } catch (err) {
       console.error("Google Login Error:", err);
-      toast.error("Unable to login with Google.");
+      notifyError(describeError(err, "Unable to login with Google."), {
+        id: loadingId,
+      });
       setGoogleLoading(false);
     }
   };
