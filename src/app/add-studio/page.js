@@ -2,7 +2,14 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
+import {
+  apiErrorMessage,
+  describeError,
+  notifyError,
+  notifyLoading,
+  notifySuccess,
+  SESSION_EXPIRED_MESSAGE,
+} from "@/lib/notify";
 
 const initialForm = {
   title: "",
@@ -41,17 +48,20 @@ export default function AddStudioPage() {
     if (!value) return;
 
     if (amenities.some((item) => item.toLowerCase() === value.toLowerCase())) {
-      toast.error("This amenity has already been added.");
+      notifyError("This amenity has already been added.");
       setAmenityInput("");
       return;
     }
 
     setAmenities((prev) => [...prev, value]);
     setAmenityInput("");
+
+    notifySuccess("Amenity added successfully!");
   };
 
   const removeAmenity = (itemToRemove) => {
     setAmenities((prev) => prev.filter((item) => item !== itemToRemove));
+    notifySuccess("Amenity removed.");
   };
 
   const handleAmenityKeyDown = (e) => {
@@ -64,12 +74,16 @@ export default function AddStudioPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (loading) return;
+
     if (amenities.length === 0) {
-      toast.error("Please add at least one studio amenity.");
+      notifyError("Please add at least one studio amenity.");
       return;
     }
 
     setLoading(true);
+
+    const loadingId = notifyLoading("Creating studio...");
 
     try {
       const response = await fetch("/api/studios", {
@@ -86,7 +100,7 @@ export default function AddStudioPage() {
       });
 
       if (response.status === 401) {
-        toast.error("Your session has expired. Please login again.");
+        notifyError(SESSION_EXPIRED_MESSAGE, { id: loadingId });
         router.push("/login");
         return;
       }
@@ -96,28 +110,35 @@ export default function AddStudioPage() {
 
       if (!text.trim()) {
         throw new Error(
-          `API returned an empty response. Status: ${response.status}`
+          apiErrorMessage(
+            response.status,
+            null,
+            "The server returned an empty response. Please try again."
+          )
         );
       }
 
       if (!contentType.includes("application/json")) {
-        console.error("Unexpected API response:", {
-          status: response.status,
-          contentType,
-          response: text,
-        });
         throw new Error(
-          `API returned an invalid response. Status: ${response.status}`
+          apiErrorMessage(
+            response.status,
+            null,
+            "The server returned an unexpected response. Please try again."
+          )
         );
       }
 
       const result = JSON.parse(text);
 
       if (!response.ok || !result.success) {
-        throw new Error(result.message || "Failed to create studio.");
+        throw new Error(
+          apiErrorMessage(response.status, result.message, "Failed to create studio.")
+        );
       }
 
-      toast.success("Your studio has been created successfully!");
+      notifySuccess("Your studio has been created successfully!", {
+        id: loadingId,
+      });
       setFormData(initialForm);
       setAmenities([]);
 
@@ -126,7 +147,9 @@ export default function AddStudioPage() {
       }, 1500);
     } catch (err) {
       console.error("Create Studio Error:", err);
-      toast.error(err.message || "Something went wrong.");
+      notifyError(describeError(err, "Failed to create studio."), {
+        id: loadingId,
+      });
     } finally {
       setLoading(false);
     }

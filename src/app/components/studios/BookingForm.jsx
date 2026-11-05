@@ -2,7 +2,13 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
+import {
+  apiErrorMessage,
+  describeError,
+  notifyError,
+  notifyLoading,
+  notifySuccess,
+} from "@/lib/notify";
 
 export default function BookingForm({ studio }) {
 const [date, setDate] = useState("");
@@ -26,16 +32,19 @@ const totalPrice = totalHours * Number(studio.hourlyRate);
 const handleBooking = async (e) => {
 e.preventDefault();
 
+if (loading) return;
 
 if (!date || !startTime || !endTime) {
-  toast.error("Please fill in all booking fields.");
+  notifyError("Please fill in all booking fields.");
   return;
 }
 
 if (totalHours <= 0) {
-  toast.error("End time must be after start time.");
+  notifyError("End time must be after start time.");
   return;
 }
+
+const loadingId = notifyLoading("Processing booking...");
 
 try {
   setLoading(true);
@@ -54,6 +63,7 @@ try {
   });
 
   if (res.status === 401) {
+    notifyError(apiErrorMessage(401), { id: loadingId });
     router.push("/login");
     return;
   }
@@ -61,16 +71,20 @@ try {
   const result = await res.json();
 
   if (!res.ok || !result.success) {
-    throw new Error(result.message || "Booking failed");
+    throw new Error(
+      apiErrorMessage(res.status, result.message, "Booking failed.")
+    );
   }
 
-  toast.success("Booking request submitted successfully!");
+  notifySuccess("Booking request submitted successfully!", { id: loadingId });
 
   setDate("");
   setStartTime("");
   setEndTime("");
 } catch (error) {
-  toast.error(error.message || "Something went wrong!");
+  notifyError(describeError(error, "Booking failed."), {
+    id: loadingId,
+  });
 } finally {
   setLoading(false);
 }

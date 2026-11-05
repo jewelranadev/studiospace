@@ -20,6 +20,14 @@ import {
 } from "lucide-react";
 
 import { authClient } from "@/lib/auth-client";
+import ConfirmDialog from "@/app/components/shared/ConfirmDialog";
+import {
+  describeError,
+  notifyError,
+  notifyLoading,
+  notifySuccess,
+  sanitizeMessage,
+} from "@/lib/notify";
 
 const Navbar = () => {
   const [theme, setTheme] = useState("light");
@@ -27,6 +35,7 @@ const Navbar = () => {
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [logoutOpen, setLogoutOpen] = useState(false);
 
   const pathname = usePathname();
   const router = useRouter();
@@ -69,19 +78,42 @@ const Navbar = () => {
     document.documentElement.classList.toggle("dark", newTheme === "dark");
   };
 
-  // Logout
+  // Logout (runs after the confirmation dialog)
   const handleLogout = async () => {
+    const loadingId = notifyLoading("Logging out...");
+
     try {
-      await authClient.signOut();
+      const { error } = await authClient.signOut();
+
+      if (error) {
+        notifyError(
+          sanitizeMessage(error.message) || "Logout failed. Please try again.",
+          { id: loadingId }
+        );
+        // Keep the dialog open so the user can retry.
+        return;
+      }
 
       setIsDropdownOpen(false);
       setIsMenuOpen(false);
+
+      notifySuccess("Logged out successfully!", { id: loadingId });
+      setLogoutOpen(false);
 
       router.push("/");
       router.refresh();
     } catch (error) {
       console.error("Logout failed:", error);
+      notifyError(describeError(error, "Logout failed. Please try again."), {
+        id: loadingId,
+      });
     }
+  };
+
+  const openLogoutConfirm = () => {
+    setIsDropdownOpen(false);
+    setIsMenuOpen(false);
+    setLogoutOpen(true);
   };
 
   const closeMenu = () => {
@@ -104,6 +136,7 @@ const Navbar = () => {
   };
 
   return (
+    <>
     <header className="sticky top-0 z-50 border-b border-gray-100 bg-white/95 shadow-sm backdrop-blur-md dark:border-gray-700 dark:bg-gray-900/95">
       <nav className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Logo */}
@@ -249,7 +282,7 @@ const Navbar = () => {
                     <hr className="my-2 border-gray-100 dark:border-gray-700" />
 
                     <button
-                      onClick={handleLogout}
+                      onClick={openLogoutConfirm}
                       className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-red-500 transition hover:bg-red-50 dark:hover:bg-red-950"
                     >
                       <LogOut size={18} />
@@ -394,7 +427,7 @@ const Navbar = () => {
                 />
 
                 <button
-                  onClick={handleLogout}
+                  onClick={openLogoutConfirm}
                   className="flex items-center gap-3 text-left font-semibold text-red-500"
                 >
                   <LogOut size={18} />
@@ -406,6 +439,19 @@ const Navbar = () => {
         </div>
       )}
     </header>
+
+    <ConfirmDialog
+      open={logoutOpen}
+      variant="destructive"
+      icon={<LogOut size={24} />}
+      title="Log out of StudioSpace?"
+      description="You will need to login again to access your account."
+      confirmLabel="Logout"
+      cancelLabel="Stay Logged In"
+      onConfirm={handleLogout}
+      onClose={() => setLogoutOpen(false)}
+    />
+    </>
   );
 };
 

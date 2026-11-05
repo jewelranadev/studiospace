@@ -3,6 +3,13 @@
 import { useState } from "react";
 import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
+import {
+  describeError,
+  notifyError,
+  notifyLoading,
+  notifySuccess,
+  sanitizeMessage,
+} from "@/lib/notify";
 import { Mail, ArrowLeft, Loader2, CheckCircle } from "lucide-react";
 
 export default function ForgotPasswordPage() {
@@ -14,13 +21,19 @@ export default function ForgotPasswordPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (loading) return;
+
     setError("");
     setSuccess(false);
 
     if (!email.trim()) {
-      setError("Please enter your email address.");
+      const message = "Please enter your email address.";
+      setError(message);
+      notifyError(message);
       return;
     }
+
+    const loadingId = notifyLoading("Sending reset link...");
 
     try {
       setLoading(true);
@@ -31,13 +44,25 @@ export default function ForgotPasswordPage() {
       });
 
       if (error) {
-        setError(error.message || "Something went wrong. Please try again.");
+        const message =
+          sanitizeMessage(error.message) ||
+          "Unable to send reset link. Please try again.";
+        setError(message);
+        notifyError(message, { id: loadingId });
         return;
       }
 
       setSuccess(true);
+      notifySuccess("Password reset link sent! Please check your email.", {
+        id: loadingId,
+      });
     } catch (err) {
-      setError("Unable to send reset link. Please try again.");
+      const message = describeError(
+        err,
+        "Unable to send reset link. Please try again."
+      );
+      setError(message);
+      notifyError(message, { id: loadingId });
     } finally {
       setLoading(false);
     }
